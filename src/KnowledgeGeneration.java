@@ -23,9 +23,9 @@ public class KnowledgeGeneration {
         for(String sentenceString : sentencesString){
            // /*******************/System.out.println(sentenceString);
             Sentence sentence = Sentence.ParseSentence(sentenceString.trim());
-            Pair<List<String>, List<String>> result = SemanticRelationsGeneration.generateSemanticRelations(sentence);
-            posFacts.addAll(result.getKey());
-            dependenciesFacts.addAll(result.getValue());
+            SemanticRelationsGeneration.generateSemanticRelations(sentence);
+            //posFacts.addAll(result.getKey());
+            //dependenciesFacts.addAll(result.getValue());
 
             ///*******************/ System.out.println(Sentence.DependenciesToString(sentence));
             sentenceList.add(sentence);
@@ -36,17 +36,25 @@ public class KnowledgeGeneration {
         }
         //Write POS and SemanticDependencies
         for (String s:
-             posFacts) {
+             SemanticRelationsGeneration.getPosFacts()) {
             bw.write(s);
             bw.newLine();
         }
         bw.newLine();
         bw.newLine();
         for (String s:
-                dependenciesFacts) {
+                SemanticRelationsGeneration.getDependenciesFacts()) {
             bw.write(s);
             bw.newLine();
         }
+        bw.newLine();
+        bw.newLine();
+        for (String s:
+                SemanticRelationsGeneration.getSementicRelations()) {
+            bw.write(s);
+            bw.newLine();
+        }
+
 
         WordNet.BuildOntology(nouns);
         List<Rule> ontologyRules = WordNet.WriteOntology(manager, SHOULD_WRITE_TO_FILE);

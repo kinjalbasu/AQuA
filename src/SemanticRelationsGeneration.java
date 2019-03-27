@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 
 public class SemanticRelationsGeneration {
 
-    public static Pair<List<String>,List<String>> generateSemanticRelations(Sentence sentence){
-        List<String> posFacts = new ArrayList<>();
-        List<String> dependenciesFacts = new ArrayList<>();
+    private static List<String> posFacts = new ArrayList<>();
+    private static List<String> dependenciesFacts = new ArrayList<>();
+    private static List<String> sementicRelations = new ArrayList<>();
+    public static void generateSemanticRelations(Sentence sentence){
+
         String regexPattern = "^[a-zA-Z0-9-]*$";
         for (Word word: sentence.wordList) {
             //String w = word.getWord();
@@ -18,7 +20,7 @@ public class SemanticRelationsGeneration {
             if(w.matches(regexPattern)){
                 String pos = word.getPOSTag().toLowerCase().replaceAll("\\$","_po");
                 if(pos.contains("-")) pos = pos.split("-")[0];
-                String s = "pos("+w+","+pos+").";
+                String s = "_pos("+w+","+pos+").";
                 //System.out.println(s);
                 posFacts.add(s);
             }
@@ -26,6 +28,7 @@ public class SemanticRelationsGeneration {
 
         }
         Map<Integer,String> indexLemmaMap = sentence.wordList.stream().collect(Collectors.toMap(Word :: getWordIndex, Word:: getLemma));
+        Map<String,String> lemmaPosMap = sentence.wordList.stream().collect(Collectors.toMap(Word :: getLemma, Word:: getPOSTag, (pos1, pos2)-> pos1 ));
         for (TypedDependency dependency : sentence.dependencies){
             String relation = dependency.reln().toString().replace(':','_');
             if(relation.equalsIgnoreCase("root")
@@ -36,11 +39,37 @@ public class SemanticRelationsGeneration {
            // String dep = dependency.dep().backingLabel().value();
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
-            String s = relation + "(" + gov + "," + dep + ").";
+            String s = "_"+relation + "(" + gov + "," + dep + ").";
             //System.out.println(s);
             dependenciesFacts.add(s);
+
+
+
+            if(relation.equalsIgnoreCase("compound")
+                    && lemmaPosMap.get(gov).equalsIgnoreCase("nn")
+                    && lemmaPosMap.get(dep).equalsIgnoreCase("nn")){
+                 sementicRelations.add(getIsARule(gov,dep));
+                //System.out.println(rule);
+
+            }
         }
 
-        return new Pair<>(posFacts,dependenciesFacts);
+    }
+
+    public static List<String> getPosFacts() {
+        return posFacts;
+    }
+
+    public static List<String> getDependenciesFacts() {
+        return dependenciesFacts;
+    }
+
+    public static List<String> getSementicRelations() {
+        return sementicRelations;
+    }
+
+    private static String getIsARule(String gov, String dep) {
+        String rule = "is_a("+dep+"_"+gov+","+gov+").";
+        return rule;
     }
 }
