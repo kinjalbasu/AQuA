@@ -23,6 +23,7 @@ public class KnowledgeGeneration {
         for(String sentenceString : sentencesString){
            // /*******************/System.out.println(sentenceString);
             Sentence sentence = Sentence.ParseSentence(sentenceString.trim());
+            System.out.println(sentence.toString()+"\n");
             SemanticRelationsGeneration.generateSemanticRelations(sentence);
             //posFacts.addAll(result.getKey());
             //dependenciesFacts.addAll(result.getValue());

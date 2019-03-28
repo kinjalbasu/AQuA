@@ -87,6 +87,8 @@ quantification(X,Y) :- _pos(X,cd), _noun(Y), _nummod(Y,X), not _ab_quantificatio
 agent(A,E) :- _noun(A), event(E,B,_,_), _verb(B), _nsubj(B,A), not _ab_nsubj(B,A).
 agent(A,E) :- event(E,B,_,_), _verb(B), _noun(A), _nsubj_agent(B,A), not _ab_nsubj(B,A) .
 agent(A,E) :- event(E,B,_,_), _verb(B), _noun(A), _nmod_agent(B,A), not _ab_nsubj(B,A).
+agent(A,E) :- event(E,B,_,_), _verb(B), _noun(A), _acl(C,B), nsubj(C,A), not _ab_agent(A,E).
+agent(A,E) :- event(E,B,_,_), _verb(B), _noun(A), _acl(C,B), _conj_and(D,C), _nsubj(D,A), not _ab_agent(A,E).
 
 _ab_nsubj(A,B) :- _nsubj(A,B), _cop(A,_).
 %~~~~~~~~~~~~~~~~~~~~~~~~~~       12. Experiencer     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

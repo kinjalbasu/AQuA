@@ -12,10 +12,14 @@ public class Parent {
         //System.out.println("PLEASE PROVIDE ME SOME KNOWLEDGE - ");
         //String content = scan.nextLine();
 
-        String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
-     //String content ="John and Marry own a car. They were traveling from Dallas to Houston with the car. The engine of the car broke down in the middle of the road. The car was repaired by John's brother.";
+        //String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
 
- //       String content = "John went to the park yesterday because he saw hot air balloons taking off from there";
+        //String content = "Oxygen is a chemical element with symbol O and atomic number 8. It is a member of the chalcogen group on the periodic table and is a highly reactive nonmetal and oxidizing agent that readily forms compounds (notably oxides) with most elements. By mass, oxygen is the third most abundant element in the universe, after hydrogen and helium. At standard temperature and pressure, two atoms of the element bind to form dioxygen, a colorless and odorless diatomic gas with the formula O. Diatomic oxygen gas constitutes 20 percent of the Earth's atmosphere. However, monitoring of atmospheric oxygen levels show a global downward trend, because of fossil fuel burning. Oxygen is the most abundant element by mass in the Earth's crust as part of oxide compounds such as silicon dioxide, making up almost half of the crust's mass.";
+        String content = "A reusable launch system (RLS, or reusable launch vehicle, RLV) is a launch system which is capable of launching a payload into space more than once. This contrasts with expendable launch systems, where each launch vehicle is launched once and then discarded. No completely reusable orbital launch system has ever been created. Two partially reusable launch systems were developed, the Space Shuttle and Falcon 9. The Space Shuttle was partially reusable: the orbiter (which included the Space Shuttle main engines and the Orbital Maneuvering System engines), and the two solid rocket boosters were reused after several months of refitting work for each launch. The external tank was discarded after each flight.";
+
+        //String content ="John and Marry own a car. They were traveling from Dallas to Houston with the car. The engine of the car broke down in the middle of the road. The car was repaired by John's brother.";
+
+        //String content = "John went to the park yesterday because he saw hot air balloons taking off from there";
         //String question = "Since what year did ABC stylize abc's logo, as abc ?";
         //String question = "what company owns the american_broadcasting_company ?";
         //String question = "what company owns the american_broadcasting_company ?";
@@ -54,6 +58,63 @@ public class Parent {
         bw2.close();
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+   //--------------For Demo------------------
+        String knowledgePath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\knowledge.lp";
+
+        BufferedReader knowledgee_br = new BufferedReader(new FileReader(knowledgePath));
+        List<String> events = new ArrayList<>();
+
+        String p = knowledgee_br.readLine();
+        while(p != null){
+            if(p.startsWith("event") && !p.contains(":-"))
+                events.add(p);
+            p = knowledgee_br.readLine();
+        }
+
+        String semanticPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\semanticRelations.lp";
+        BufferedWriter rel_bw = new BufferedWriter(new FileWriter(semanticPath, true));
+        rel_bw.newLine();
+        rel_bw.newLine();
+
+        for (String s : events
+             ) {
+                rel_bw.write(s);
+                rel_bw.newLine();
+        }
+        rel_bw.close();
+        String rulesPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\Rules.lp";
+        Runtime rt = Runtime.getRuntime();
+        Process proc = rt.exec("gringo "  + semanticPath + " " + rulesPath + " -t");
+        BufferedReader stdInput = new BufferedReader(new
+                InputStreamReader(proc.getInputStream()));
+
+        BufferedReader stdError = new BufferedReader(new
+                InputStreamReader(proc.getErrorStream()));
+        String s =null;
+        while((s = stdInput.readLine()) != null){
+            if(s.startsWith("#") || s.startsWith("_")) continue;
+            System.out.println(s);
+        }
+         String err = null;
+        while((err = stdError.readLine()) != null){
+
+            //System.out.println(err);
+        }
+    //-------------For Demo-------------------
+/*
         //System.out.println("I AM READY TO ANSWER YOUR QUESTIONS....");
         String questionFlag = "y";
         do {
@@ -96,7 +157,7 @@ public class Parent {
             }
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
             questionFlag = scan.nextLine();
-        }while(questionFlag.toLowerCase().equals("y"));
+        }while(questionFlag.toLowerCase().equals("y"));*/
     }
 
 

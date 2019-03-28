@@ -21,7 +21,7 @@ public class Scasp_passage {
         //"networks. The network is headquartered on Columbus_Avenue and West_66th_Street in Manhattan, with additional major " +
         //"offices and production facilities in New_York_City, Los_Angeles and Burbank in California.";
         
-        System.out.println("PLEASE WAIT!!! I AM LEARNING");
+        //System.out.println("PLEASE WAIT!!! I AM LEARNING");
         StorageManager manager = new StorageManager();
         Pair<List<Rule>, List<Rule>> rulesPair = KnowledgeGeneration.RepresentKnowledge(manager, content, bw2);
 

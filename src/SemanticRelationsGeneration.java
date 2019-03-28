@@ -49,8 +49,13 @@ public class SemanticRelationsGeneration {
                     && lemmaPosMap.get(gov).equalsIgnoreCase("nn")
                     && lemmaPosMap.get(dep).equalsIgnoreCase("nn")){
                  sementicRelations.add(getIsARule(gov,dep));
-                //System.out.println(rule);
+            }
 
+
+            if(relation.equalsIgnoreCase("compound")
+                    && lemmaPosMap.get(gov).equalsIgnoreCase("nnp")
+                    && lemmaPosMap.get(dep).equalsIgnoreCase("nnp")){
+                sementicRelations.add(getSynonymRule(gov,dep));
             }
         }
 
@@ -68,8 +73,14 @@ public class SemanticRelationsGeneration {
         return sementicRelations;
     }
 
+
     private static String getIsARule(String gov, String dep) {
-        String rule = "is_a("+dep+"_"+gov+","+gov+").";
-        return rule;
+        return "is_a("+dep+"_"+gov+","+gov+").";
     }
+
+
+    private static String getSynonymRule(String gov, String dep) {
+        return "synonym("+gov+","+dep+"_"+gov+").\nsynonym("+dep+","+dep+"_"+gov+").";
+    }
+
 }
