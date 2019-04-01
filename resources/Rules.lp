@@ -31,7 +31,7 @@ _adverb(A) :- _pos(A,rbs).
 %~~~~~~~~~~~~~~~~~~~~~~~~~~      1. Possession     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 possession(X,Y) :- event(_,V,_,_), _verb(V), _possessive_verbs(V), _dobj(V,X), _noun(X), _nsubj(V,Y), _noun(Y), not _ab_possession(X,Y).
 
-
+possession(X,Y) :- _noun(X), _noun(Y), _nmod_poss(Y,X), not _ab_possession(X,Y).
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~      2. Part-Whole/Meronymy     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Code in JAVA
@@ -41,7 +41,7 @@ part_whole(X,Y) :- _noun(X), _noun(Y), _nmod_of(X,Y), not _ab_part_whole(X,Y).
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~      3. Kinship     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-kinship(X,Y) :- _noun(X), _noun(Y), _nmod_poss(Y,X), not _ab_kinship(X,Y).
+%kinship(X,Y) :- _noun(X), _noun(Y), _nmod_poss(Y,X), not _ab_kinship(X,Y).
 
 
 
@@ -163,7 +163,7 @@ cause(E,Y):- event(E,A,_,_), _verb(A), _causal_verb(A), _dobj(A,Y), not _ab_caus
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~      23. Make Produce     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-make_produce(X,Y) :- _noun(X), _noun(Y), _verb(Z), _dobj(Z,Y), _nsubj(Z,X), not _ab_make_produce(X,Y).
+make_produce(X,Y) :- _noun(X), _noun(Y), _production_verb(Z), _dobj(Z,Y), _nsubj(Z,X), not _ab_make_produce(X,Y).
 
 
 % 24. Reason/ Justification
@@ -176,25 +176,28 @@ purpose(X,Y) :- event(Y,V,_,_), _verb(V), _nmod_for(V,X), not _ab_purpose(X,Y).
 
 
 %------Facts---------
-_motion_verb(went).
-_motion_verb(taking).
-_motion_verb(traveling).
+_motion_verb(go).
+_motion_verb(take).
+_motion_verb(travel).
 
 _possessive_verbs(has).
 _possessive_verbs(own).
 
-_experiencing_verbs(feels).
-_experiencing_verbs(saw).
+_experiencing_verbs(feel).
+_experiencing_verbs(see).
 
-_content_verb(talked).
-_content_verb(said).
+_content_verb(talk).
+_content_verb(say).
 
 _intent_verb(want).
 
-_stimulation_verb(heard).
+_stimulation_verb(hear).
 _stimulation_verb(smell).
 
 _causal_verb(cause).
+
+_production_verb(create).
+_production_verb(manufacture).
 %````````````````````````````````````````````````
 
 %1. Subject of an event is the agent of that event.

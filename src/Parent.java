@@ -13,10 +13,10 @@ public class Parent {
         //String content = scan.nextLine();
 
         //String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
+        //String content = "The Matrix is a 1999 science fiction action film written and directed by The Wachowskis, starring Keanu Reeves, Laurence Fishburne, CarrieAnne Moss, Hugo Weaving, and Joe Pantoliano. It depicts a dystopian future in which reality as perceived by most humans is actually a simulated reality called \"the Matrix\", created by sentient machines to subdue the human population, while their bodies heat and electrical activity are used as an energy source. Computer programmer \"Neo\" learns this truth and is drawn into a rebellion against the machines, which involves other people who have been freed from the \"dream world\".";
 
-        //String content = "Oxygen is a chemical element with symbol O and atomic number 8. It is a member of the chalcogen group on the periodic table and is a highly reactive nonmetal and oxidizing agent that readily forms compounds (notably oxides) with most elements. By mass, oxygen is the third most abundant element in the universe, after hydrogen and helium. At standard temperature and pressure, two atoms of the element bind to form dioxygen, a colorless and odorless diatomic gas with the formula O. Diatomic oxygen gas constitutes 20 percent of the Earth's atmosphere. However, monitoring of atmospheric oxygen levels show a global downward trend, because of fossil fuel burning. Oxygen is the most abundant element by mass in the Earth's crust as part of oxide compounds such as silicon dioxide, making up almost half of the crust's mass.";
         String content = "A reusable launch system (RLS, or reusable launch vehicle, RLV) is a launch system which is capable of launching a payload into space more than once. This contrasts with expendable launch systems, where each launch vehicle is launched once and then discarded. No completely reusable orbital launch system has ever been created. Two partially reusable launch systems were developed, the Space Shuttle and Falcon 9. The Space Shuttle was partially reusable: the orbiter (which included the Space Shuttle main engines and the Orbital Maneuvering System engines), and the two solid rocket boosters were reused after several months of refitting work for each launch. The external tank was discarded after each flight.";
-
+        //String content = "Oxygen is a chemical element with symbol O and atomic number 8. It is a member of the chalcogen group on the periodic table and is a highly reactive nonmetal and oxidizing agent that readily forms compounds (notably oxides) with most elements. By mass, oxygen is the third most abundant element in the universe, after hydrogen and helium. At standard temperature and pressure, two atoms of the element bind to form dioxygen, a colorless and odorless diatomic gas with the formula O. Diatomic oxygen gas constitutes 20 percent of the Earth's atmosphere. However, monitoring of atmospheric oxygen levels show a global downward trend, because of fossil fuel burning. Oxygen is the most abundant element by mass in the Earth's crust as part of oxide compounds such as silicon dioxide, making up almost half of the crust's mass.";
         //String content ="John and Marry own a car. They were traveling from Dallas to Houston with the car. The engine of the car broke down in the middle of the road. The car was repaired by John's brother.";
 
         //String content = "John went to the park yesterday because he saw hot air balloons taking off from there";
@@ -72,8 +72,8 @@ public class Parent {
 
 
    //--------------For Demo------------------
-        String knowledgePath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\knowledge.lp";
-
+        //String knowledgePath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\knowledge.lp";
+        String knowledgePath ="E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\knowledge.lp";
         BufferedReader knowledgee_br = new BufferedReader(new FileReader(knowledgePath));
         List<String> events = new ArrayList<>();
 
@@ -84,7 +84,8 @@ public class Parent {
             p = knowledgee_br.readLine();
         }
 
-        String semanticPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\semanticRelations.lp";
+        //String semanticPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\semanticRelations.lp";
+        String semanticPath = "E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\semanticRelations.lp";
         BufferedWriter rel_bw = new BufferedWriter(new FileWriter(semanticPath, true));
         rel_bw.newLine();
         rel_bw.newLine();
@@ -95,7 +96,8 @@ public class Parent {
                 rel_bw.newLine();
         }
         rel_bw.close();
-        String rulesPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\Rules.lp";
+        //String rulesPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\Rules.lp";
+        String rulesPath = "E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\Rules.lp";
         Runtime rt = Runtime.getRuntime();
         Process proc = rt.exec("gringo "  + semanticPath + " " + rulesPath + " -t");
         BufferedReader stdInput = new BufferedReader(new
@@ -130,7 +132,7 @@ public class Parent {
 
             //String path = knowledge_ouput.getAbsolutePath();
             //String path = "E:\\college\\UTD\\UTD_Projects\\TestAgent1\\resources\\knowledge.lp";
-            String path = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\knowledge.lp";
+            String path = "E:\college\UTD\UTD_Projects\QA_Project\CommonSenseQA\resources\knowledge.lp";
             Runtime rt = Runtime.getRuntime();
             Process proc = rt.exec("sasp " + path);
 
