@@ -11,7 +11,8 @@ public class Rule implements Comparable<Rule> {
     private List<Literal> body;
     private boolean isQuestion = false;
     public LiteralType maxRuleQuality = LiteralType.FACT;
-    public Rule(Literal head, List<Literal> body, boolean isQuestion){
+
+    public Rule(Literal head, List<Literal> body, boolean isQuestion) {
         this.head = head;
         this.body = body;
         this.isQuestion = isQuestion;
@@ -19,14 +20,14 @@ public class Rule implements Comparable<Rule> {
 
     @Override
     public String toString() {
-        if(head == null && body == null) return "";
-        if(head == null && body.size() == 0) return "";
+        if (head == null && body == null) return "";
+        if (head == null && body.size() == 0) return "";
 
-        if(this.body == null || this.body.size() == 0){
+        if (this.body == null || this.body.size() == 0) {
             return this.head.toString();
         }
 
-        if(head == null){
+        if (head == null) {
             return BodyToString(this.body);
         }
 
@@ -38,11 +39,11 @@ public class Rule implements Comparable<Rule> {
 
     private String BodyToString(List<Literal> body) {
         StringBuilder builder = new StringBuilder();
-        for(Literal literal : body){
+        for (Literal literal : body) {
             builder.append(String.format("%s,", literal.toString()));
         }
 
-        return builder.substring(0, builder.length()-1).toString();
+        return builder.substring(0, builder.length() - 1).toString();
     }
 
     @Override
@@ -65,7 +66,7 @@ public class Rule implements Comparable<Rule> {
         int rank = Rule.GetRuleRank(this);
         int otherRank = Rule.GetRuleRank(rule);
 
-        if(rank == otherRank){
+        if (rank == otherRank) {
             return this.toString().compareTo(rule.toString());
         }
 
@@ -73,19 +74,19 @@ public class Rule implements Comparable<Rule> {
     }
 
     private static boolean IsFact(Rule rule) {
-        if(rule.head != null && rule.body == null){
+        if (rule.head != null && rule.body == null) {
             return true;
         }
 
         return false;
     }
 
-    private static int GetRuleRank(Rule rule){
-        if(rule.isQuestion) {
+    private static int GetRuleRank(Rule rule) {
+        if (rule.isQuestion) {
             return 1;
         }
 
-        if(IsFact(rule)){
+        if (IsFact(rule)) {
             return 3;
         }
 
@@ -94,12 +95,11 @@ public class Rule implements Comparable<Rule> {
 
     public static Rule AggregateAllRules(List<Rule> rules) {
         Set<Literal> literalSet = new TreeSet<>();
-        for(Rule rule : rules){
-            if(rule.head != null){
-                if(rule.body != null && rule.body.size() == 0) continue;
+        for (Rule rule : rules) {
+            if (rule.head != null) {
+                if (rule.body != null && rule.body.size() == 0) continue;
                 literalSet.add(rule.head);
-            }
-            else if(rule.body != null && rule.body.size() > 0){
+            } else if (rule.body != null && rule.body.size() > 0) {
                 literalSet.addAll(rule.body);
             }
         }
@@ -118,13 +118,13 @@ public class Rule implements Comparable<Rule> {
     }
 
     public static Rule FilterRule(Rule inputRule, LiteralType maxLiteralType) {
-        if(inputRule.head != null && inputRule.body != null && inputRule.body.size() > 0) return null;
+        if (inputRule.head != null && inputRule.body != null && inputRule.body.size() > 0) return null;
         int maxLiteralQuality = maxLiteralType.ordinal();
         List<Literal> filteredLiterals = new ArrayList<>();
-        for(Literal bodyTerm : inputRule.body){
+        for (Literal bodyTerm : inputRule.body) {
             LiteralType literalType = bodyTerm.GetLiteralType();
             int literalQuality = literalType.ordinal();
-            if(literalQuality < maxLiteralQuality) continue;
+            if (literalQuality < maxLiteralQuality) continue;
             filteredLiterals.add(bodyTerm);
         }
 
@@ -134,7 +134,7 @@ public class Rule implements Comparable<Rule> {
     }
 
     public void SetQuery(String sentenceString, QuestionInformation information) {
-        if(this.head != null) return;
+        if (this.head != null) return;
         Word predicate = new Word("question", false);
         List<Literal> terms = new ArrayList<>();
         terms.add(new Literal(new Word(String.format("%s", sentenceString), false)));
@@ -144,11 +144,14 @@ public class Rule implements Comparable<Rule> {
         this.head = queryHead;
     }
 
-    private String GetConfidenceStringFromValue(int value){
-        switch(value){
-            case 1: return "certain";
-            case 2: return "likely";
-            case 3: return "possible";
+    private String GetConfidenceStringFromValue(int value) {
+        switch (value) {
+            case 1:
+                return "certain";
+            case 2:
+                return "likely";
+            case 3:
+                return "possible";
         }
         return "guess";
     }

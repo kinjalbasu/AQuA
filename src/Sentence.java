@@ -42,7 +42,7 @@ public class Sentence {
     protected Sentence(String sentence) {
         int currentEventId = Word.eventId;
         List<Word> wordList = ProcessSentence(sentence, false);
-        sentence = PreprocessSentence(wordList);
+        sentence = IsQuestion(sentence) ? PreprocessSentence(wordList,true) : PreprocessSentence(wordList,false);
         Word.eventId = currentEventId;
         this.wordList = ProcessSentence(sentence, true);
         List<TypedDependency> dependencies = GetDependencies(sentence);
@@ -62,7 +62,7 @@ public class Sentence {
     }
 
 
-    private String PreprocessSentence(List<Word> inputList) {
+    private String PreprocessSentence(List<Word> inputList, boolean isQ) {
         List<Word> lowerCasedList = getFormattedList(inputList);
         StringBuilder builder = new StringBuilder();
         Pair<List<Word>, List<Rule>> result = ProcessOrganizations(lowerCasedList);
@@ -88,7 +88,7 @@ public class Sentence {
             if (hasFoundBracket) continue;
             builder.append(word.getWord() + " ");
         }
-        builder.append(".");
+        if (!isQ) builder.append(".");
         return builder.toString().trim();
     }
 

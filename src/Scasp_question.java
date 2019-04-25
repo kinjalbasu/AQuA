@@ -41,6 +41,7 @@ public class Scasp_question {
         }*/
 
         //----------------------------------------------------------------------------------------------------
+        List<Rule> semanticRules = SemanticQuery.getSemanticQueries(question);
         List<Rule> rules = question.GenerateAllRules();
         LiteralType type = LiteralType.FACT;
         //System.out.println("/*----------------  " + type.toString() + "  ------------------*/");
