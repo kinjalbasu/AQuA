@@ -61,5 +61,34 @@ _compound(system,supply).
 _nmod_of(design,system).
 
 
+synonym(tesla,nikola_tesla).
+synonym(nikola,nikola_tesla).
 is_a(electricity_system,system).
 is_a(supply_system,system).
+
+
+event(1, be, null, null).
+event(2, know, null, null).
+
+synonym(tesla,nikola_tesla).
+synonym(nikola,nikola_tesla).
+is_a(electricity_system,system).
+is_a(supply_system,system).
+event(1,be,null,null).
+event(2,know,null,null).
+value(serbian,inventor).
+value(american,inventor).
+value(electrical,engineer).
+value(mechanical,engineer).
+value(modern,system).
+value(alternate,system).
+value(current,system).
+purpose(contribution,2).
+manner(best,2).
+agent(tesla,2).
+is_a(tesla,inventor).
+is_a(tesla,engineer).
+is_a(tesla,physicist).
+is_a(tesla,futurist).
+part_whole(design,system).
+possession(he,contribution).

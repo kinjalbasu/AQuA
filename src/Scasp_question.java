@@ -27,7 +27,7 @@ public class Scasp_question {
 
     public static void printQuestion(String content, BufferedWriter bw) throws IOException {
 
-        TestSetupParser();
+//        TestSetupParser();
         InitializeTest();
 
         // TODO code application logic here

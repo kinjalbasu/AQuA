@@ -6,16 +6,18 @@ import java.util.Scanner;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 public class Parent {
+    public static final String KNOWLEDGE_PATH = "resources/knowledge.lp";
+    public static final String QUESTION_PATH = "resources/question.lp";
+    public static final String SEMANTIC_PATH = "resources/semanticRelations.lp";
+    public static final String RULE_PATH = "resources/Rules.lp";
+
     public static void main(String[] args) throws IOException {
         RedwoodConfiguration.current().clear().apply();
         Scanner scan = new Scanner(System.in);
-        //System.out.println("PLEASE PROVIDE ME SOME KNOWLEDGE - ");
-        //String content = scan.nextLine();
-
-        //String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
+        String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
         //String content = "The Matrix is a 1999 science fiction action film written and directed by The Wachowskis, starring Keanu Reeves, Laurence Fishburne, CarrieAnne Moss, Hugo Weaving, and Joe Pantoliano. It depicts a dystopian future in which reality as perceived by most humans is actually a simulated reality called \"the Matrix\", created by sentient machines to subdue the human population, while their bodies heat and electrical activity are used as an energy source. Computer programmer \"Neo\" learns this truth and is drawn into a rebellion against the machines, which involves other people who have been freed from the \"dream world\".";
 
-        String content = "A reusable launch system (RLS, or reusable launch vehicle, RLV) is a launch system which is capable of launching a payload into space more than once. This contrasts with expendable launch systems, where each launch vehicle is launched once and then discarded. No completely reusable orbital launch system has ever been created. Two partially reusable launch systems were developed, the Space Shuttle and Falcon 9. The Space Shuttle was partially reusable: the orbiter (which included the Space Shuttle main engines and the Orbital Maneuvering System engines), and the two solid rocket boosters were reused after several months of refitting work for each launch. The external tank was discarded after each flight.";
+        //String content = "A reusable launch system (RLS, or reusable launch vehicle, RLV) is a launch system which is capable of launching a payload into space more than once. This contrasts with expendable launch systems, where each launch vehicle is launched once and then discarded. No completely reusable orbital launch system has ever been created. Two partially reusable launch systems were developed, the Space Shuttle and Falcon 9. The Space Shuttle was partially reusable: the orbiter (which included the Space Shuttle main engines and the Orbital Maneuvering System engines), and the two solid rocket boosters were reused after several months of refitting work for each launch. The external tank was discarded after each flight.";
         //String content = "Oxygen is a chemical element with symbol O and atomic number 8. It is a member of the chalcogen group on the periodic table and is a highly reactive nonmetal and oxidizing agent that readily forms compounds (notably oxides) with most elements. By mass, oxygen is the third most abundant element in the universe, after hydrogen and helium. At standard temperature and pressure, two atoms of the element bind to form dioxygen, a colorless and odorless diatomic gas with the formula O. Diatomic oxygen gas constitutes 20 percent of the Earth's atmosphere. However, monitoring of atmospheric oxygen levels show a global downward trend, because of fossil fuel burning. Oxygen is the most abundant element by mass in the Earth's crust as part of oxide compounds such as silicon dioxide, making up almost half of the crust's mass.";
         //String content ="John and Marry own a car. They were traveling from Dallas to Houston with the car. The engine of the car broke down in the middle of the road. The car was repaired by John's brother.";
 
@@ -33,47 +35,27 @@ public class Parent {
 
 
         //Create knowledge.lp
-        File knowledge_ouput = new File("resources/knowledge.lp");
+        File knowledge_ouput = new File(KNOWLEDGE_PATH);
         FileWriter fw1 = new FileWriter(knowledge_ouput);
         BufferedWriter bw1 = new BufferedWriter(fw1);
 
-        //Create knowledge.lp
-        File parser_ouput = new File("resources/semanticRelations.lp");
+        //Create semanticRelations.lp
+        File parser_ouput = new File(SEMANTIC_PATH);
         FileWriter fw2 = new FileWriter(parser_ouput);
         BufferedWriter bw2 = new BufferedWriter(fw2);
 
 
         //Create question.lp
-        File question_output = new File("resources/question.lp");
-
-
-
-
+        File question_output = new File(QUESTION_PATH);
 
         //Print in Knowledge File
         bw1.write("#include 'CommonRules.lp'.\n#include 'question.lp'." +
                 "\n#include 'Rules.lp'.\n#include 'semanticRelations.lp'.\n");
         Scasp_passage.printPassage(content, bw1, bw2);
         bw1.close();
-        bw2.close();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-   //--------------For Demo------------------
-        //String knowledgePath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\knowledge.lp";
-        String knowledgePath ="E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\knowledge.lp";
+        String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
         BufferedReader knowledgee_br = new BufferedReader(new FileReader(knowledgePath));
         List<String> events = new ArrayList<>();
 
@@ -83,21 +65,17 @@ public class Parent {
                 events.add(p);
             p = knowledgee_br.readLine();
         }
-
-        //String semanticPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\semanticRelations.lp";
-        String semanticPath = "E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\semanticRelations.lp";
-        BufferedWriter rel_bw = new BufferedWriter(new FileWriter(semanticPath, true));
-        rel_bw.newLine();
-        rel_bw.newLine();
+        String semanticPath = new File(SEMANTIC_PATH).getCanonicalPath();
+        bw2.newLine();
+        bw2.newLine();
 
         for (String s : events
              ) {
-                rel_bw.write(s);
-                rel_bw.newLine();
+                bw2.write(s);
+                bw2.newLine();
         }
-        rel_bw.close();
-        //String rulesPath = "C:\\Users\\kxb170730\\IdeaProjects\\CommonSenseQA\\resources\\Rules.lp";
-        String rulesPath = "E:\\college\\UTD\\UTD_Projects\\QA_Project\\CommonSenseQA\\resources\\Rules.lp";
+        bw2.close();
+        String rulesPath = new File(RULE_PATH).getCanonicalPath();;
         Runtime rt = Runtime.getRuntime();
         Process proc = rt.exec("gringo "  + semanticPath + " " + rulesPath + " -t");
         BufferedReader stdInput = new BufferedReader(new
@@ -105,20 +83,22 @@ public class Parent {
 
         BufferedReader stdError = new BufferedReader(new
                 InputStreamReader(proc.getErrorStream()));
+        BufferedWriter rel_bw = new BufferedWriter(new FileWriter(semanticPath, true));
+        rel_bw.newLine();
         String s =null;
         while((s = stdInput.readLine()) != null){
             if(s.startsWith("#") || s.startsWith("_")) continue;
-            System.out.println(s);
+            rel_bw.write(s);
+            rel_bw.newLine();
         }
-         String err = null;
+        rel_bw.close();
+        String err = null;
         while((err = stdError.readLine()) != null){
-
             //System.out.println(err);
         }
     //-------------For Demo-------------------
-/*
-        //System.out.println("I AM READY TO ANSWER YOUR QUESTIONS....");
         String questionFlag = "y";
+
         do {
             System.out.print("Question = ");
             String question = scan.nextLine();
@@ -127,39 +107,26 @@ public class Parent {
             Scasp_question.printQuestion(question, bw3);
             bw3.write("?- query(1,Question,answer( Answer, Confidence_Level)).");
             bw3.close();
+            Process proc1 = rt.exec("sasp " + knowledgePath + " " + semanticPath);
 
-            //Running CMD
+            BufferedReader stdInput1 = new BufferedReader(new
+                    InputStreamReader(proc1.getInputStream()));
 
-            //String path = knowledge_ouput.getAbsolutePath();
-            //String path = "E:\\college\\UTD\\UTD_Projects\\TestAgent1\\resources\\knowledge.lp";
-            String path = "E:\college\UTD\UTD_Projects\QA_Project\CommonSenseQA\resources\knowledge.lp";
-            Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec("sasp " + path);
-
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(proc.getInputStream()));
-
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(proc.getErrorStream()));
-
-            // read the output from the command
-            //System.out.println("Here is the standard output of the command:\n");
-            String s = null;
+            BufferedReader stdError1 = new BufferedReader(new
+                    InputStreamReader(proc1.getErrorStream()));
+            String s1 = null;
             List<String> output = new ArrayList<>();
-            while ((s = stdInput.readLine()) != null) {
-                output.add(s);
+            while ((s1 = stdInput1.readLine()) != null) {
+                output.add(s1);
             }
-            //System.out.println(output.get(1));
             System.out.println(output.get(2));
             System.out.println(output.get(3));
-            // read any errors from the attempted command
-            //System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
+            while ((s1 = stdError1.readLine()) != null) {
+               // System.out.println(s1);
             }
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
             questionFlag = scan.nextLine();
-        }while(questionFlag.toLowerCase().equals("y"));*/
+        }while(!questionFlag.toLowerCase().equals("n"));
     }
 
 
