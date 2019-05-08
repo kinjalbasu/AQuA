@@ -55,6 +55,14 @@ public class KnowledgeGeneration {
             bw.write(s);
             bw.newLine();
         }
+        bw.newLine();
+        bw.newLine();
+        for (String s:
+                SemanticRelationsGeneration.getConceptualRelations()) {
+            bw.write(s);
+            bw.newLine();
+        }
+
 
 
         WordNet.BuildOntology(nouns);

@@ -14,7 +14,7 @@ public class Parent {
     public static void main(String[] args) throws IOException {
         RedwoodConfiguration.current().clear().apply();
         Scanner scan = new Scanner(System.in);
-        String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
+        //String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
         //String content = "The Matrix is a 1999 science fiction action film written and directed by The Wachowskis, starring Keanu Reeves, Laurence Fishburne, CarrieAnne Moss, Hugo Weaving, and Joe Pantoliano. It depicts a dystopian future in which reality as perceived by most humans is actually a simulated reality called \"the Matrix\", created by sentient machines to subdue the human population, while their bodies heat and electrical activity are used as an energy source. Computer programmer \"Neo\" learns this truth and is drawn into a rebellion against the machines, which involves other people who have been freed from the \"dream world\".";
 
         //String content = "A reusable launch system (RLS, or reusable launch vehicle, RLV) is a launch system which is capable of launching a payload into space more than once. This contrasts with expendable launch systems, where each launch vehicle is launched once and then discarded. No completely reusable orbital launch system has ever been created. Two partially reusable launch systems were developed, the Space Shuttle and Falcon 9. The Space Shuttle was partially reusable: the orbiter (which included the Space Shuttle main engines and the Orbital Maneuvering System engines), and the two solid rocket boosters were reused after several months of refitting work for each launch. The external tank was discarded after each flight.";
@@ -30,9 +30,13 @@ public class Parent {
         //String question = "when did tesla die ?";
         //String question = "when was nikola_tesla born ?";
         //String question = "which scientist was a computer engineer?";
+        String content = "There are four apples, five bananas on the table";
 
 
-
+        //paths
+        String semanticPath = new File(SEMANTIC_PATH).getCanonicalPath();
+        String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
+        String rulesPath = new File(RULE_PATH).getCanonicalPath();;
 
         //Create knowledge.lp
         File knowledge_ouput = new File(KNOWLEDGE_PATH);
@@ -55,7 +59,7 @@ public class Parent {
         bw1.close();
 
 
-        String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
+
         BufferedReader knowledgee_br = new BufferedReader(new FileReader(knowledgePath));
         List<String> events = new ArrayList<>();
 
@@ -65,7 +69,7 @@ public class Parent {
                 events.add(p);
             p = knowledgee_br.readLine();
         }
-        String semanticPath = new File(SEMANTIC_PATH).getCanonicalPath();
+
         bw2.newLine();
         bw2.newLine();
 
@@ -75,7 +79,7 @@ public class Parent {
                 bw2.newLine();
         }
         bw2.close();
-        String rulesPath = new File(RULE_PATH).getCanonicalPath();;
+
         Runtime rt = Runtime.getRuntime();
         Process proc = rt.exec("gringo "  + semanticPath + " " + rulesPath + " -t");
         BufferedReader stdInput = new BufferedReader(new
