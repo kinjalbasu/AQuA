@@ -9,5 +9,6 @@ public enum AnswerType {
     YEAR,
     DAY,
     MONTH,
-    UNKNOWN
+    UNKNOWN,
+    QUANTITY
 }

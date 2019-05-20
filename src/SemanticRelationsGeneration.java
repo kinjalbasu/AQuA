@@ -28,6 +28,7 @@ public class SemanticRelationsGeneration {
             if(w.matches(regexPattern)){
                 String pos = word.getPOSTag().toLowerCase().replaceAll("\\$","_po");
                 if(pos.contains("-")) pos = pos.split("-")[0];
+
                 String s = "_pos("+w+","+pos+").";
                 //System.out.println(s);
                 posFacts.add(s);

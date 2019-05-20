@@ -3,8 +3,8 @@
 #include 'Rules.lp'.
 #include 'semanticRelations.lp'.
 _is(apple, banana).
-_mod(apple, four).
-_mod(banana, five).
+_mod(apple, 4).
+_mod(banana, 5).
 _property(1, banana, on, table).
 apple(apple).
 apple(banana).

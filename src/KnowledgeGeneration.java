@@ -12,8 +12,8 @@ public class KnowledgeGeneration {
 
     public static Pair<List<Rule>, List<Rule>> RepresentKnowledge(StorageManager manager, String content, BufferedWriter bw)
             throws IOException {
-        List<String> posFacts = new ArrayList<>();
-        List<String> dependenciesFacts = new ArrayList<>();
+       // List<String> posFacts = new ArrayList<>();
+       // List<String> dependenciesFacts = new ArrayList<>();
 
         List<Rule> storyRules = new ArrayList<>();
         Sentence.SetupLexicalizedParser();

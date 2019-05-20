@@ -366,11 +366,20 @@ public class Sentence {
         //List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
         int index = 1;
         for (CoreLabel token : annotation.get(CoreAnnotations.TokensAnnotation.class)) {
+            Word word = null;
             String wordString = token.get(CoreAnnotations.TextAnnotation.class);
             String lemmaString = token.getString(CoreAnnotations.LemmaAnnotation.class);
             String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
             String NERTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-            Word word = new Word(index, wordString, lemmaString, posTag, NERTag, isPreProcessed);
+            if(NERTag.equalsIgnoreCase("NUMBER")){
+                String v1 = token.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+                Double d = Double.parseDouble(v1);
+                String v2 = String.valueOf(d.intValue());
+                word = new Word(index, v2, lemmaString, posTag, NERTag, isPreProcessed);
+            }
+            else{
+                word = new Word(index, wordString, lemmaString, posTag, NERTag, isPreProcessed);
+            }
             wordList.add(word);
             index++;
         }

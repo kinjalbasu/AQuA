@@ -17,13 +17,23 @@ public class Question extends Sentence {
         Word questionWord = null;
         for(Word word : this.wordList){
             if(word.IsQuestionWord()){
-                questionWord = word;
+                if(word.getWord().equalsIgnoreCase("how")
+                        && this.wordList.get(word.getWordIndex()).getWord().matches("many|much"))
+                {
+                    String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
+                    information.questionType = GetQuestionType(newWordString);
+                    questionWord = word;
+                }
+                else {
+                    questionWord = word;
+                    information.questionType = GetQuestionType(word.getWord());
+                }
                 break;
             }
         }
 
         information.questionWord = questionWord;
-        information.questionType = GetQuestionType(questionWord);
+        //information.questionType = GetQuestionType(questionWord);
         Word answerKind = GetAnswerKind(questionWord);
         information.answerKind = answerKind;
         information.answerType = GetAnswerType(answerKind, information.questionType);
@@ -36,11 +46,14 @@ public class Question extends Sentence {
         value = information.answerKind == null ? "null":information.answerKind.toString();
         builder.append("Answer Word : " + value + "\n");
         builder.append("Answer Type : " + information.answerType.toString() + "\n");
-       // System.out.println(builder.toString());
+        System.out.println(builder.toString());
         return information;
     }
 
     private AnswerType GetAnswerType(Word answerKind, QuestionType questionType) {
+        if(questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH){
+            return  AnswerType.QUANTITY;
+        }
         if(questionType == QuestionType.WHEN){
             return AnswerType.TIME;
         }
@@ -81,12 +94,14 @@ public class Question extends Sentence {
         return null;
     }
 
-    private QuestionType GetQuestionType(Word questionWord) {
-        switch(questionWord.getLemma().toLowerCase()){
+    private QuestionType GetQuestionType(String questionWord) {
+        switch(questionWord.toLowerCase()){
             case "what": return QuestionType.WHAT;
             case "where": return QuestionType.WHERE;
             case "who": return QuestionType.WHO;
             case "when": return QuestionType.WHEN;
+            case "how_many": return QuestionType.HOW_MANY;
+            case "how_much": return QuestionType.HOW_MUCH;
         }
 
         return QuestionType.UNKNOWN;

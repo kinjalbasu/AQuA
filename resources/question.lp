@@ -1,7 +1,9 @@
-question('when was nikola tesla born ?', 1).
-question('when was nikola tesla born ?', certain, X2) :- _mod(tesla, nikola),_property(E2, bear, _by, S2),_similar(tesla, O2),event(E2, bear, _, O2),time(X2).
-question('when was nikola tesla born ?', certain, X2) :- _mod(tesla, nikola),_similar(tesla, O2),event(E2, bear, S2, O2),time(X2).
-question('when was nikola tesla born ?', likely, X2) :- _property(E2, bear, _by, S2),_similar(tesla, O2),event(E2, bear, _, O2),time(X2).
-question('when was nikola tesla born ?', likely, X2) :- _similar(tesla, O2),event(E2, bear, S2, O2),time(X2).
-question('when was nikola tesla born ?', possible, X2) :- time(X2).
+question('how many fruits are there on the table / .', 1).
+question('how many fruits are there on the table / .', certain, X1) :- _mod(fruit, many),_property(E1, be, _by, S1),_property(E1, be, on, table),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, _, O1),total_element(fruit, X1).
+question('how many fruits are there on the table / .', certain, X1) :- _mod(fruit, many),_property(E1, be, on, table),_relation(S1, E1, _clause),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, _, _),total_element(fruit, X1).
+question('how many fruits are there on the table / .', certain, X1) :- _mod(fruit, many),_property(E1, be, on, table),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, S1, O1),total_element(fruit, X1).
+question('how many fruits are there on the table / .', likely, X1) :- _property(E1, be, _by, S1),_property(E1, be, on, table),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, _, O1),total_element(fruit, X1).
+question('how many fruits are there on the table / .', likely, X1) :- _property(E1, be, on, table),_relation(S1, E1, _clause),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, _, _),total_element(fruit, X1).
+question('how many fruits are there on the table / .', likely, X1) :- _property(E1, be, on, table),_similar(fruit, S1),_similar(many_fruit, S1),event(E1, be, S1, O1),total_element(fruit, X1).
+question('how many fruits are there on the table / .', possible, X1) :- total_element(fruit, X1).
 ?- query(1,Question,answer( Answer, Confidence_Level)).
