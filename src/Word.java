@@ -1269,7 +1269,7 @@ public class Word {
         return AnswerType.UNKNOWN;
     }
 
-    public static List<Rule> GenerateQuestionConstraintRules(QuestionInformation information) {
+    public static List<Rule> GenerateQuestionConstraintRules(QuestionInformation information, List<TypedDependency> dependencies, List<Word> wordList) {
         List<Rule> rules = new ArrayList<>();
         if (information.questionType == QuestionType.WHAT && information.answerKind == null) return rules;
 
@@ -1310,11 +1310,20 @@ public class Word {
                 return rules;
 
             case QUANTITY:
+
+
+                TypedDependency dependency = dependencies.stream().filter(p -> p.reln().getShortName().equalsIgnoreCase("amod")
+                        && p.dep().value().equalsIgnoreCase("many"))
+                        .findFirst()
+                        .orElse(null);
+                String keyWord = wordList.stream().filter(p -> p.getWordIndex() == dependency.gov().index()).findFirst().get().getLemma();
+
+
                 Literal quantityVariable = new Literal(new Word(String.format("X%s", information.questionWord.id), true),
                         LiteralType.BASE_CONSTRAINT);
                 terms = new ArrayList<>();
 
-                terms.add(new Literal(new Word("fruit", false)));
+                terms.add(new Literal(new Word(keyWord, false)));
                 terms.add(quantityVariable);
                 Literal quantityLiteral = new Literal(quantityPredicate, terms);
                 rule = new Rule(quantityLiteral, null, true);

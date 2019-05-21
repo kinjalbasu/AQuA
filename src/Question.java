@@ -122,7 +122,7 @@ public class Question extends Sentence {
             }
         }
 
-        List<Rule> finalConstraints = Word.GenerateQuestionConstraintRules(information);
+        List<Rule> finalConstraints = Word.GenerateQuestionConstraintRules(this.information, this.dependencies, this.wordList);
         List<Rule> combinedConstraints = new ArrayList<>();
         Rule allConstraints = Rule.AggregateAllRules(constraints);
         for(Rule constraint : finalConstraints) {

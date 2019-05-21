@@ -30,7 +30,7 @@ public class Parent {
         //String question = "when did tesla die ?";
         //String question = "when was nikola_tesla born ?";
         //String question = "which scientist was a computer engineer?";
-        String content = "There are four apples, five bananas on the table";
+        String content = "There are two forks, 2 spoons, three bananas and one apple on the table.";
 
 
         //paths
@@ -54,7 +54,7 @@ public class Parent {
 
         //Print in Knowledge File
         bw1.write("#include 'CommonRules.lp'.\n#include 'question.lp'." +
-                "\n#include 'Rules.lp'.\n#include 'semanticRelations.lp'.\n");
+                "\n#include 'semanticRelations.lp'.\n");
         Scasp_passage.printPassage(content, bw1, bw2);
         bw1.close();
 

@@ -3,6 +3,7 @@ import edu.stanford.nlp.trees.TypedDependency;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,16 +37,19 @@ public class SemanticRelationsGeneration {
 
                 //~~~~~Adding ConceptNet
                 if(pos.matches("nn|nnp|nns|nnps")){
-                    String concept = null;
+                    List<String>  conceptList = null;
                     try {
-                        concept = getConcept(w);
+                        conceptList = getConcept(w);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }
-                    if(!concept.isEmpty()){
-                        conceptualRelations.add(getConceptualRule(w,concept));
+                    if(!conceptList.isEmpty()){
+                        for (String concept: conceptList){
+                            conceptualRelations.add(getConceptualRule(w,concept));
+                        }
+
                     }
                 }
             }
@@ -86,7 +90,7 @@ public class SemanticRelationsGeneration {
 
     }
 
-    private static String getConcept(String w) throws IOException, JSONException, URISyntaxException {
+    private static List<String> getConcept(String w) throws IOException, JSONException, URISyntaxException {
         String concept = "";
         StringBuilder response = new StringBuilder();
        /* URIBuilder urlBuilder = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb");
@@ -98,7 +102,7 @@ public class SemanticRelationsGeneration {
 
         URL url = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb")
                 .addParameter("instance",w)
-                .addParameter("topK","1")
+                .addParameter("topK","5")
                 .build().toURL();
         //URL url = new URL("https://concept.research.microsoft.com/api/Concept/ScoreByProb?instance=apple&topK=1");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -112,7 +116,13 @@ public class SemanticRelationsGeneration {
        // return result.toString();
         JSONObject result = new JSONObject(response.toString());
 
-        return result.keys().next().toString();
+
+        List<String> conceptList = new ArrayList<>();
+        Iterator<String> keys = result.keys();
+        while(keys.hasNext()) {
+            conceptList.add(keys.next());
+        }
+        return conceptList;
 
     }
 
