@@ -4,11 +4,12 @@ _pos(2,cd).
 _pos(fork,nns).
 _pos(2,cd).
 _pos(spoon,nns).
+_pos(and,cc).
 _pos(3,cd).
 _pos(banana,nns).
-_pos(and,cc).
-_pos(1,cd).
-_pos(apple,nn).
+_pos(with,in).
+_pos(4,cd).
+_pos(apple,nns).
 _pos(on,in).
 _pos(the,dt).
 _pos(table,nn).
@@ -20,16 +21,16 @@ _nsubj(be,fork).
 _nummod(spoon,2).
 _nsubj(be,spoon).
 _conj_and(fork,spoon).
+_cc(fork,and).
 _nummod(banana,3).
 _nsubj(be,banana).
 _conj_and(fork,banana).
-_cc(fork,and).
-_nummod(apple,1).
-_nsubj(be,apple).
-_conj_and(fork,apple).
+_case(apple,with).
+_nummod(apple,4).
+_nmod_with(banana,apple).
 _case(table,on).
 _det(table,the).
-_nmod_on(apple,table).
+_nmod_on(be,table).
 
 
 
@@ -61,7 +62,6 @@ is_a(table,database_object).
 is_a(table,object).
 
 
-event(1, be, apple, null).
 event(1, be, banana, null).
 event(1, be, fork, null).
 event(1, be, spoon, null).
@@ -91,15 +91,13 @@ is_a(table,item).
 is_a(table,furniture).
 is_a(table,database_object).
 is_a(table,object).
-event(1,be,apple,null).
 event(1,be,banana,null).
 event(1,be,fork,null).
 event(1,be,spoon,null).
 agent(fork,1).
 agent(spoon,1).
 agent(banana,1).
-agent(apple,1).
 quantification(2,fork).
 quantification(2,spoon).
 quantification(3,banana).
-quantification(1,apple).
+quantification(4,apple).

@@ -1,20 +1,19 @@
 #include 'CommonRules.lp'.
 #include 'question.lp'.
 #include 'semanticRelations.lp'.
-_mod(apple, 1).
+_mod(apple, 4).
 _mod(banana, 3).
 _mod(fork, 2).
 _mod(spoon, 2).
-_property(1, apple, on, table).
+_property(1, banana, with, '4_apple').
+_property(1, be, on, table).
 apple(apple).
 banana(banana).
-event(1, be, apple, null).
 event(1, be, banana, null).
 event(1, be, fork, null).
 event(1, be, spoon, null).
 fork(fork).
-number(2).
-number(one).
+number(four).
 number(three).
 number(two).
 spoon(spoon).

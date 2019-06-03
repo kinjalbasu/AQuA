@@ -46,7 +46,7 @@ public class Question extends Sentence {
         value = information.answerKind == null ? "null":information.answerKind.toString();
         builder.append("Answer Word : " + value + "\n");
         builder.append("Answer Type : " + information.answerType.toString() + "\n");
-        System.out.println(builder.toString());
+        //System.out.println(builder.toString());
         return information;
     }
 

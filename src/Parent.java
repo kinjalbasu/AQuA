@@ -30,7 +30,7 @@ public class Parent {
         //String question = "when did tesla die ?";
         //String question = "when was nikola_tesla born ?";
         //String question = "which scientist was a computer engineer?";
-        String content = "There are two forks, 2 spoons, three bananas and one apple on the table.";
+        String content = "There are two forks, two spoons and three bananas with four apples on the table.";
 
 
         //paths
