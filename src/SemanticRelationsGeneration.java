@@ -63,13 +63,9 @@ public class SemanticRelationsGeneration {
             if(relation.equalsIgnoreCase("root")
                     || relation.equalsIgnoreCase("punct")) continue;
 
-
-            //String gov = dependency.gov().backingLabel().value();
-           // String dep = dependency.dep().backingLabel().value();
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
             String s = "_"+relation + "(" + gov + "," + dep + ").";
-            //System.out.println(s);
             dependenciesFacts.add(s);
 
 
@@ -93,12 +89,6 @@ public class SemanticRelationsGeneration {
     private static List<String> getConcept(String w) throws IOException, JSONException, URISyntaxException {
         String concept = "";
         StringBuilder response = new StringBuilder();
-       /* URIBuilder urlBuilder = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb");
-        urlBuilder.addParameter("instance",w);
-        urlBuilder.addParameter("topK","1");*/
-
-
-
 
         URL url = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb")
                 .addParameter("instance",w)
