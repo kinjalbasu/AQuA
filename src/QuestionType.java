@@ -8,5 +8,6 @@ public enum QuestionType {
     HOW_MANY,
     HOW_MUCH,
     WHEN,
-    UNKNOWN
+    UNKNOWN,
+    TRUE_FALSE
 }

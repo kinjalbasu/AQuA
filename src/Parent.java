@@ -38,6 +38,10 @@ public class Parent {
         String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
         String rulesPath = new File(RULE_PATH).getCanonicalPath();;
 
+
+        //Create question.lp
+        File question_output = new File(QUESTION_PATH);
+        /*
         //Create knowledge.lp
         File knowledge_ouput = new File(KNOWLEDGE_PATH);
         FileWriter fw1 = new FileWriter(knowledge_ouput);
@@ -49,8 +53,7 @@ public class Parent {
         BufferedWriter bw2 = new BufferedWriter(fw2);
 
 
-        //Create question.lp
-        File question_output = new File(QUESTION_PATH);
+
 
         //Print in Knowledge File
         bw1.write("#include 'CommonRules.lp'.\n#include 'question.lp'." +
@@ -99,18 +102,20 @@ public class Parent {
         String err = null;
         while((err = stdError.readLine()) != null){
             //System.out.println(err);
-        }
+        }*/
     //-------------For Demo-------------------
         String questionFlag = "y";
 
         do {
-            System.out.print("Question = ");
-            String question = scan.nextLine();
+            //System.out.print("Question = ");
+            //String question = scan.nextLine();
+            String question = "Is there a ball ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             Scasp_question.printQuestion(question, bw3);
             bw3.write("?- query(1,Question,answer( Answer, Confidence_Level)).");
             bw3.close();
+            Runtime rt = Runtime.getRuntime();
             Process proc1 = rt.exec("sasp " + knowledgePath + " " + semanticPath);
 
             BufferedReader stdInput1 = new BufferedReader(new

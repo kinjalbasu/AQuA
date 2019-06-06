@@ -27,12 +27,13 @@ public class Scasp_question {
 
     public static void printQuestion(String content, BufferedWriter bw) throws IOException {
 
-//        TestSetupParser();
+        TestSetupParser();
         InitializeTest();
 
         // TODO code application logic here
         //String content = "Since what year did ABC stylize abc's logo, as abc ?";
         Question question = new Question(content);
+        List<Rule> rules = ClevrQueryGeneration.getClevrQuery(question);
         //System.out.println(Sentence.DependenciesToString(question));
         //----------------------------------------------------------------------------------------------------
         /*if (question.information.questionType == QuestionType.WHO && question.semanticRoot.getPOSTag().equals("NN")){
@@ -42,7 +43,7 @@ public class Scasp_question {
 
         //----------------------------------------------------------------------------------------------------
         //List<Rule> semanticRules = SemanticQuery.getSemanticQueries(question);
-        List<Rule> rules = question.GenerateAllRules();
+      //  List<Rule> rules = question.GenerateAllRules();
         LiteralType type = LiteralType.FACT;
         //System.out.println("/*----------------  " + type.toString() + "  ------------------*/");
         for (Rule rule : rules) {

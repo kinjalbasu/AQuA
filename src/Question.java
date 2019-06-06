@@ -9,7 +9,41 @@ public class Question extends Sentence {
 
     public Question(String sentence) {
         super(sentence);
-        information = ExtractInformation();
+        //information = ExtractInformation();
+        information = ExtractInformationForClever();
+    }
+
+    private QuestionInformation ExtractInformationForClever() {
+        QuestionInformation information = new QuestionInformation();
+        information.questionWord = getQuestionWordClevr();
+        information.questionType = getQuestionTypeClevr(information.questionWord);
+        information.answerKind = null;
+        information.answerType = getAnswerTypeClevr(information.questionType);
+
+        return information;
+    }
+
+    private AnswerType getAnswerTypeClevr(QuestionType questionType) {
+        if(questionType == QuestionType.TRUE_FALSE){
+            return AnswerType.BOOLEAN;
+        }
+        return AnswerType.UNKNOWN;
+    }
+
+    private QuestionType getQuestionTypeClevr(Word questionWord) {
+        String w = questionWord.getWord().toLowerCase();
+        if(w.matches("is|are")){
+            return QuestionType.TRUE_FALSE;
+        }
+        return QuestionType.UNKNOWN;
+    }
+
+    private Word getQuestionWordClevr() {
+        Word questionWord = null;
+        if(this.wordList.get(0).getWord().toLowerCase().matches("is|are")){
+            questionWord = this.wordList.get(0);
+        }
+        return questionWord;
     }
 
     private QuestionInformation ExtractInformation() {
@@ -19,6 +53,12 @@ public class Question extends Sentence {
             if(word.IsQuestionWord()){
                 if(word.getWord().equalsIgnoreCase("how")
                         && this.wordList.get(word.getWordIndex()).getWord().matches("many|much"))
+                {
+                    String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
+                    information.questionType = GetQuestionType(newWordString);
+                    questionWord = word;
+                }
+                else if(word.getWord().toLowerCase().matches("is|are"))
                 {
                     String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
                     information.questionType = GetQuestionType(newWordString);

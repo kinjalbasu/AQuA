@@ -10,5 +10,6 @@ public enum AnswerType {
     DAY,
     MONTH,
     UNKNOWN,
-    QUANTITY
+    QUANTITY,
+    BOOLEAN
 }
