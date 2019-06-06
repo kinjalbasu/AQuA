@@ -109,7 +109,7 @@ public class Parent {
         do {
             //System.out.print("Question = ");
             //String question = scan.nextLine();
-            String question = "Is there a ball ?";
+            String question = "Is there any other thing that has the same material as the tiny purple cube ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             Scasp_question.printQuestion(question, bw3);

@@ -20,34 +20,30 @@ public class SemanticRelationsGeneration {
     private static List<String> dependenciesFacts = new ArrayList<>();
     private static List<String> sementicRelations = new ArrayList<>();
     private static List<String> conceptualRelations = new ArrayList<>();
-    public static void generateSemanticRelations(Sentence sentence) throws IOException {
+
+    public static void generateSemanticRelations(Sentence sentence){
 
         String regexPattern = "^[a-zA-Z0-9-]*$";
-        for (Word word: sentence.wordList) {
+        for (Word word : sentence.wordList) {
             //String w = word.getWord();
             String w = word.getLemma();
-            if(w.matches(regexPattern)){
-                String pos = word.getPOSTag().toLowerCase().replaceAll("\\$","_po");
-                if(pos.contains("-")) pos = pos.split("-")[0];
+            if (w.matches(regexPattern)) {
+                String pos = word.getPOSTag().toLowerCase().replaceAll("\\$", "_po");
+                if (pos.contains("-")) pos = pos.split("-")[0];
 
-                String s = "_pos("+w+","+pos+").";
+                String s = "_pos(" + w + "," + pos + ").";
                 //System.out.println(s);
                 posFacts.add(s);
 
 
                 //~~~~~Adding ConceptNet
-                if(pos.matches("nn|nnp|nns|nnps")){
-                    List<String>  conceptList = null;
-                    try {
-                        conceptList = getConcept(w);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
-                    if(!conceptList.isEmpty()){
-                        for (String concept: conceptList){
-                            conceptualRelations.add(getConceptualRule(w,concept));
+                if (pos.matches("nn|nnp|nns|nnps")) {
+                    List<String> conceptList = null;
+                    conceptList = getConcept(w);
+
+                    if (!conceptList.isEmpty()) {
+                        for (String concept : conceptList) {
+                            conceptualRelations.add(getConceptualRule(w, concept));
                         }
 
                     }
@@ -56,61 +52,69 @@ public class SemanticRelationsGeneration {
 
 
         }
-        Map<Integer,String> indexLemmaMap = sentence.wordList.stream().collect(Collectors.toMap(Word :: getWordIndex, Word:: getLemma));
-        Map<String,String> lemmaPosMap = sentence.wordList.stream().collect(Collectors.toMap(Word :: getLemma, Word:: getPOSTag, (pos1, pos2)-> pos1 ));
-        for (TypedDependency dependency : sentence.dependencies){
-            String relation = dependency.reln().toString().replace(':','_');
-            if(relation.equalsIgnoreCase("root")
+        Map<Integer, String> indexLemmaMap = sentence.wordList.stream().collect(Collectors.toMap(Word::getWordIndex, Word::getLemma));
+        Map<String, String> lemmaPosMap = sentence.wordList.stream().collect(Collectors.toMap(Word::getLemma, Word::getPOSTag, (pos1, pos2) -> pos1));
+        for (TypedDependency dependency : sentence.dependencies) {
+            String relation = dependency.reln().toString().replace(':', '_');
+            if (relation.equalsIgnoreCase("root")
                     || relation.equalsIgnoreCase("punct")) continue;
 
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
-            String s = "_"+relation + "(" + gov + "," + dep + ").";
+            String s = "_" + relation + "(" + gov + "," + dep + ").";
             dependenciesFacts.add(s);
 
 
-
-            if(relation.equalsIgnoreCase("compound")
+            if (relation.equalsIgnoreCase("compound")
                     && lemmaPosMap.get(gov).equalsIgnoreCase("nn")
-                    && lemmaPosMap.get(dep).equalsIgnoreCase("nn")){
-                 sementicRelations.add(getIsARule(gov,dep));
+                    && lemmaPosMap.get(dep).equalsIgnoreCase("nn")) {
+                sementicRelations.add(getIsARule(gov, dep));
             }
 
 
-            if(relation.equalsIgnoreCase("compound")
+            if (relation.equalsIgnoreCase("compound")
                     && lemmaPosMap.get(gov).equalsIgnoreCase("nnp")
-                    && lemmaPosMap.get(dep).equalsIgnoreCase("nnp")){
-                sementicRelations.add(getSynonymRule(gov,dep));
+                    && lemmaPosMap.get(dep).equalsIgnoreCase("nnp")) {
+                sementicRelations.add(getSynonymRule(gov, dep));
             }
         }
 
     }
 
-    private static List<String> getConcept(String w) throws IOException, JSONException, URISyntaxException {
-        String concept = "";
-        StringBuilder response = new StringBuilder();
-
-        URL url = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb")
-                .addParameter("instance",w)
-                .addParameter("topK","5")
-                .build().toURL();
-        //URL url = new URL("https://concept.research.microsoft.com/api/Concept/ScoreByProb?instance=apple&topK=1");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String line;
-        while ((line = rd.readLine()) != null) {
-            response.append(line);
-        }
-        rd.close();
-       // return result.toString();
-        JSONObject result = new JSONObject(response.toString());
-
-
+    public static List<String> getConcept(String w) {
         List<String> conceptList = new ArrayList<>();
-        Iterator<String> keys = result.keys();
-        while(keys.hasNext()) {
-            conceptList.add(keys.next());
+        try {
+            String concept = "";
+
+            StringBuilder response = new StringBuilder();
+
+            URL url = new URIBuilder("https://concept.research.microsoft.com/api/Concept/ScoreByProb")
+                    .addParameter("instance", w)
+                    .addParameter("topK", "5")
+                    .build().toURL();
+            //URL url = new URL("https://concept.research.microsoft.com/api/Concept/ScoreByProb?instance=apple&topK=1");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+            }
+            rd.close();
+            // return result.toString();
+            JSONObject result = new JSONObject(response.toString());
+
+
+            Iterator<String> keys = result.keys();
+            while (keys.hasNext()) {
+                conceptList.add(keys.next());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
         return conceptList;
 
@@ -127,25 +131,26 @@ public class SemanticRelationsGeneration {
     public static List<String> getSementicRelations() {
         return sementicRelations;
     }
+
     public static List<String> getConceptualRelations() {
         return conceptualRelations;
     }
 
 
     private static String getIsARule(String gov, String dep) {
-        return "is_a("+dep+"_"+gov+","+gov+").";
+        return "is_a(" + dep + "_" + gov + "," + gov + ").";
     }
 
 
     private static String getSynonymRule(String gov, String dep) {
-        return "synonym("+gov+","+dep+"_"+gov+").\nsynonym("+dep+","+dep+"_"+gov+").";
+        return "synonym(" + gov + "," + dep + "_" + gov + ").\nsynonym(" + dep + "," + dep + "_" + gov + ").";
     }
 
     private static String getConceptualRule(String word, String concept) {
-        return "is_a("+ word +","+getCompoundWord(concept)+").";
+        return "is_a(" + word + "," + getCompoundWord(concept) + ").";
     }
 
-    private static String getCompoundWord(String w){
-        return w.replaceAll("\\s+","_");
+    private static String getCompoundWord(String w) {
+        return w.replaceAll("\\s+", "_");
     }
 }
