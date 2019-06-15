@@ -26,6 +26,20 @@ public class Literal implements Comparable<Literal> {
         }
     }
 
+    public Literal(Word predicate, List<Literal> terms, boolean isNAF){
+        String predicateString = predicate.getLemma();
+        predicateString = predicateString.replaceAll("-", "_");
+        predicateString = predicateString.replaceAll("'", "");
+        this.predicate = predicateString;
+        this.terms = terms;
+        this.isAtom = false;
+        this.isNAF = isNAF;
+
+        for(Literal term : terms){
+            this.types.addAll(term.types);
+        }
+    }
+
     public Literal(Word atom){
         this.predicate = atom.getLemma();
         if(!atom.isVariable && IsMixedCase(this.predicate) || this.predicate.contains(".") ||

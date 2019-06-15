@@ -43,21 +43,21 @@ public class Scasp_question {
 
         //----------------------------------------------------------------------------------------------------
       //  List<Rule> rules = question.GenerateAllRules();
-        LiteralType type = LiteralType.FACT;
+        //LiteralType type = LiteralType.FACT;
         //System.out.println("/*----------------  " + type.toString() + "  ------------------*/");
-        for (Rule rule : rules) {
-            if (type != rule.maxRuleQuality) {
-                type = rule.maxRuleQuality;
-                //System.out.println("/*----------------  " + type.toString() + "  ------------------*/");
-            }
-            //System.out.println(String.format("Assert.assertTrue(ruleString.contains(\"%s\"));", rule.toString()));
-        }
+//        for (Rule rule : rules) {
+//            if (type != rule.maxRuleQuality) {
+//                type = rule.maxRuleQuality;
+//                //System.out.println("/*----------------  " + type.toString() + "  ------------------*/");
+//            }
+//            //System.out.println(String.format("Assert.assertTrue(ruleString.contains(\"%s\"));", rule.toString()));
+//        }
 
         //System.out.print("\n\n");
         //List<String> ruleString = new ArrayList<>();
-        String sentence = question.sentenceString.replaceAll("'", "");
-        bw.write(String.format("question('%s', 1).", sentence));
-        bw.newLine();
+        //String sentence = question.sentenceString.replaceAll("'", "");
+        //bw.write(String.format("question('%s', 1).", sentence));
+        //bw.newLine();
         for (Rule rule : rules) {
             //System.out.println(String.format("%s.", rule.toString()));
             //ruleString.add(rule.toString());

@@ -9,8 +9,8 @@ import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 import static java.lang.Runtime.getRuntime;
 
 public class Parent {
-    public static final String KNOWLEDGE_PATH = "resources/knowledge.lp";
-    public static final String QUESTION_PATH = "resources/question.lp";
+    public static final String KNOWLEDGE_PATH = "resources/clevr/clevrKnowledge.lp";
+    public static final String QUESTION_PATH = "resources/clevr/clevrQuery.lp";
     public static final String SEMANTIC_PATH = "resources/semanticRelations.lp";
     public static final String RULE_PATH = "resources/Rules.lp";
 
@@ -39,7 +39,9 @@ public class Parent {
         //paths
         String semanticPath = new File(SEMANTIC_PATH).getCanonicalPath();
         String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
-        String rulesPath = new File(RULE_PATH).getCanonicalPath();;
+        String rulesPath = new File(RULE_PATH).getCanonicalPath();
+        ;
+        String queryPath = new File(QUESTION_PATH).getCanonicalPath();
 
 
         //Create question.lp
@@ -106,7 +108,7 @@ public class Parent {
         while((err = stdError.readLine()) != null){
             //System.out.println(err);
         }*/
-    //-------------For Demo-------------------
+        //-------------For Demo-------------------
         String questionFlag = "y";
 
         do {
@@ -115,11 +117,16 @@ public class Parent {
             String question = "Is there a red block ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
+            bw3.write("#include 'clevrKnowledge.lp'.\n" +
+                    "#include 'clevrRules.lp'.\n" +
+                    "#include 'clevrSemanticRules.lp'.\n" +
+                    "#include 'clevrCommonFacts.lp'.");
+            bw3.newLine();
             Scasp_question.printQuestion(question, bw3);
-            bw3.write("?- query(1,Question,answer( Answer, Confidence_Level)).");
+            bw3.write("?- query(Q,A).");
             bw3.close();
             Runtime rt = getRuntime();
-            Process proc1 = rt.exec("sasp " + knowledgePath + " " + semanticPath);
+            Process proc1 = rt.exec("sasp " + queryPath);
 
             BufferedReader stdInput1 = new BufferedReader(new
                     InputStreamReader(proc1.getInputStream()));
@@ -131,14 +138,18 @@ public class Parent {
             while ((s1 = stdInput1.readLine()) != null) {
                 output.add(s1);
             }
-            System.out.println(output.get(2));
-            System.out.println(output.get(3));
+            if (2 < output.size()) {
+                System.out.println(output.get(2));
+            } else {
+                System.out.println("No Answer");
+            }
+            //System.out.println(output.get(3));
             while ((s1 = stdError1.readLine()) != null) {
-               // System.out.println(s1);
+                // System.out.println(s1);
             }
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
             questionFlag = scan.nextLine();
-        }while(!questionFlag.toLowerCase().equals("n"));
+        } while (!questionFlag.toLowerCase().equals("n"));
     }
 
 

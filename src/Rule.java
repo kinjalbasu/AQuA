@@ -7,7 +7,12 @@ import java.util.TreeSet;
  * Created by dhruv on 9/24/2017.
  */
 public class Rule implements Comparable<Rule> {
+
+
     private Literal head;
+
+
+
     private List<Literal> body;
     private boolean isQuestion = false;
     public LiteralType maxRuleQuality = LiteralType.FACT;
@@ -44,6 +49,21 @@ public class Rule implements Comparable<Rule> {
         }
 
         return builder.substring(0, builder.length() - 1).toString();
+    }
+    public Literal getHead() {
+        return head;
+    }
+
+    public void setHead(Literal head) {
+        this.head = head;
+    }
+
+    public List<Literal> getBody() {
+        return body;
+    }
+
+    public void setBody(List<Literal> body) {
+        this.body = body;
     }
 
     @Override
