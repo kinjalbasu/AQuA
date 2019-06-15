@@ -18,6 +18,9 @@ public class Word {
     private String id;
     private String value;
     private NamedEntityTagger.NamedEntityTags NERTag;
+
+
+
     private HashMap<String, List<Word>> relationMap;
     public boolean isVariable = false;
     public static int eventId = 1;
@@ -121,6 +124,10 @@ public class Word {
 
     public String getLemma() {
         return lemma;
+    }
+
+    public HashMap<String, List<Word>> getRelationMap() {
+        return relationMap;
     }
 
     public String getWord() {

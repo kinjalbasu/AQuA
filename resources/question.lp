@@ -1,2 +1,3 @@
-question('Is there any other thing that has the same material as the tiny purple cube ?', 1).
+question('Is there a red block ?', 1).
+find_all_filters(block, L),list_object(L, Ids),list_length(Ids, C),quantification(N, block),gte(C, N).
 ?- query(1,Question,answer( Answer, Confidence_Level)).

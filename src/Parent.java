@@ -5,6 +5,9 @@ import java.util.Scanner;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
+
+import static java.lang.Runtime.getRuntime;
+
 public class Parent {
     public static final String KNOWLEDGE_PATH = "resources/knowledge.lp";
     public static final String QUESTION_PATH = "resources/question.lp";
@@ -109,13 +112,13 @@ public class Parent {
         do {
             //System.out.print("Question = ");
             //String question = scan.nextLine();
-            String question = "Is there any other thing that has the same material as the tiny purple cube ?";
+            String question = "Is there a red block ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             Scasp_question.printQuestion(question, bw3);
             bw3.write("?- query(1,Question,answer( Answer, Confidence_Level)).");
             bw3.close();
-            Runtime rt = Runtime.getRuntime();
+            Runtime rt = getRuntime();
             Process proc1 = rt.exec("sasp " + knowledgePath + " " + semanticPath);
 
             BufferedReader stdInput1 = new BufferedReader(new

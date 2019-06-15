@@ -80,6 +80,8 @@ value(X,Y) :- _verb(X) , _noun(Y), _amod(Y,X), not _ab_value(X,Y).
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~      10. Quantification/Extent      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 quantification(X,Y) :- _pos(X,cd), _noun(Y), _nummod(Y,X), not _ab_quantification(X,Y).
+quantification(1,X) :- _noun(X), _det(X,a), not _ab_quantification(1,X).
+quantification(1,X) :- _noun(X), _det(X,an), not _ab_quantification(1,X).
 
 
 

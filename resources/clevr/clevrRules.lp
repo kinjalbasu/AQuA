@@ -26,6 +26,11 @@ append([X|L1],L2,[X|L3]):-
 add_tail([],X,[X]).
 add_tail([H|T],X,[H|L]) :- add_tail(T,X,L).
 
+gt(A,B) :- A > B.
+gte(A,B) :- A >= B.
+lt(A,B) :- not gte(A,B).
+lte(A,B) :- not gt(A,B).
+
 %~~~~~GET Ids~~~~~~~~~
 count_id(L1,Id) :- property(Id,_,_), nonmember(Id,L1).
 get_all_id(L1,L3) :- count_id(L1,Id), add_tail(L1,Id,L2), get_all_id(L2,L3).
@@ -102,3 +107,22 @@ bottom_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 
 order_by_size(L) :- get_all_id(L1), mergesort(L1,L,size).
 order_left_to_right(L) :- get_all_id(L1), mergesort(L1,L,x_axis).
 order_bottom_to_top(L) :- get_all_id(L1), mergesort(L1,L,y_axis).
+
+
+%----Comparison on Count----
+
+%greater_than_count(Filters,Th) :- list_object(Filters,L), list_length(L,Th).
+
+%-------Filter List Creation---------
+
+
+get_filter(X,L1,Z,Y) :- value(Y,X), is_property(Y,Z), nonmember([Z,Y],L1).
+%get_filter(X,L1,Y,Z) :- is_a(Z,X),value(Y,Z), nonmember([Y,Z],L1).
+
+find_all_filters(X,L1,L3) :- get_filter(X,L1,Y,Z), add_tail(L1,[Y,Z],L2),find_all_filters(X,L2,L3).
+find_all_filters(X,L1,L1).
+
+find_all_filters(X,L) :- is_property(X,shape),find_all_filters(X,[[shape,X]],L).
+find_all_filters(X,L) :- similar(X,Y), is_property(Y,shape),find_all_filters(X,[[shape,Y]],L).
+find_all_filters(X,L) :- find_all_filters(X,[],L).
+
