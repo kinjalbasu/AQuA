@@ -112,9 +112,11 @@ public class Parent {
         String questionFlag = "y";
 
         do {
-            //System.out.print("Question = ");
-            //String question = scan.nextLine();
-            String question = "Is there a red block ?";
+            System.out.print("Question = ");
+            String question = scan.nextLine();
+            //String question = "Is there a red block ?";
+            //String question = "Is there a red nonmetal block ?";
+            //String question = "Are there two red blocks ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write("#include 'clevrKnowledge.lp'.\n" +
@@ -126,6 +128,7 @@ public class Parent {
             bw3.write("?- query(Q,A).");
             bw3.close();
             Runtime rt = getRuntime();
+            System.out.println("Sasp invoked");
             Process proc1 = rt.exec("sasp " + queryPath);
 
             BufferedReader stdInput1 = new BufferedReader(new
@@ -139,6 +142,7 @@ public class Parent {
                 output.add(s1);
             }
             if (2 < output.size()) {
+                System.out.println(output.get(1));
                 System.out.println(output.get(2));
             } else {
                 System.out.println("No Answer");

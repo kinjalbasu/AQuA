@@ -89,7 +89,7 @@ public class ClevrQueryGeneration {
         terms = new ArrayList<>();
         terms.add(new Literal(new Word(question.sentenceString.replaceAll("'", ""),false)));
         body.add(new Literal(new Word("question",false),terms));
-        commonRules.add(new Rule(head,body,true));
+        commonRules.add(0,new Rule(head,body,true));
 
         return commonRules;
     }

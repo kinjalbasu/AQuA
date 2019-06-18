@@ -65,22 +65,22 @@ split_at(Xs, N, Ys, Zs) :-
     append(Ys, Zs, Xs).
 	
 merge([X|Xs],[Y|Ys],[X|S],Param) :-
-    compare(X,Y,Param),
+    compare_val(X,Y,Param),
     merge(Xs,[Y|Ys],S,Param).
 merge([X|Xs],[Y|Ys],[Y|S],Param) :-
-    compare(Y,X,Param),
+    compare_val(Y,X,Param),
     merge([X|Xs], Ys, S, Param).
 
-compare(Id1,Id2,size) :- smaller_equal(Id1,Id2).	
-compare(Id1,Id2,x_axis) :- left_compare(Id1,Id2).	
-compare(Id1,Id2,y_axis) :- bottom_compare(Id1,Id2).	
+compare_val(Id1,Id2,size) :- smaller_equal(Id1,Id2).	
+compare_val(Id1,Id2,x_axis) :- left_compare(Id1,Id2).	
+compare_val(Id1,Id2,y_axis) :- bottom_compare(Id1,Id2).	
 
 
 %~~~~~~~~~~~COUNTING~~~~~~~~~~~~~~
 
 filter(_,_,[],[]).
 filter(Att,Val,[Id|T1],[Id|T2]) :- property(Id,Att,Val), filter(Att,Val,T1,T2).
-filter(Att,Val,[Id|T1],T2) :- not property(Id,Att,Val), filter(Att,Val,T1,T2).
+filter(Att,Val,[Id|T1],T2) :- filter(Att,Val,T1,T2).
 
 filter_all([],Ids,Ids).
 filter_all([[Att,Val]|T],Ids,L) :- filter(Att,Val,Ids,L1),filter_all(T,L1,L). 
