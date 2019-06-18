@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.*;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -14,7 +15,7 @@ public class Parent {
     public static final String SEMANTIC_PATH = "resources/semanticRelations.lp";
     public static final String RULE_PATH = "resources/Rules.lp";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         RedwoodConfiguration.current().clear().apply();
         Scanner scan = new Scanner(System.in);
         //String content = "Nikola Tesla (10 July 1856 – 7 January 1943) was a Serbian American inventor, electrical engineer, mechanical engineer, physicist, and futurist best known for his contributions to the design of the modern alternating current (AC) electricity supply system.";
@@ -33,7 +34,7 @@ public class Parent {
         //String question = "when did tesla die ?";
         //String question = "when was nikola_tesla born ?";
         //String question = "which scientist was a computer engineer?";
-        String content = "There are two forks, two spoons and three bananas with four apples on the table.";
+        //String content = "There are two forks, two spoons and three bananas with four apples on the table.";
 
 
         //paths
@@ -110,6 +111,8 @@ public class Parent {
         }*/
         //-------------For Demo-------------------
         String questionFlag = "y";
+        // ExecutorService executor = Executors.newCachedThreadPool();
+
 
         do {
             System.out.print("Question = ");
@@ -124,12 +127,17 @@ public class Parent {
                     "#include 'clevrSemanticRules.lp'.\n" +
                     "#include 'clevrCommonFacts.lp'.");
             bw3.newLine();
+
             Scasp_question.printQuestion(question, bw3);
             bw3.write("?- query(Q,A).");
             bw3.close();
             Runtime rt = getRuntime();
             System.out.println("Sasp invoked");
             Process proc1 = rt.exec("sasp " + queryPath);
+
+
+            //Process proc1 = future.get(10, TimeUnit.SECONDS);
+
 
             BufferedReader stdInput1 = new BufferedReader(new
                     InputStreamReader(proc1.getInputStream()));
@@ -138,22 +146,37 @@ public class Parent {
                     InputStreamReader(proc1.getErrorStream()));
             String s1 = null;
             List<String> output = new ArrayList<>();
-            while ((s1 = stdInput1.readLine()) != null) {
-                output.add(s1);
-            }
-            if (2 < output.size()) {
-                System.out.println(output.get(1));
-                System.out.println(output.get(2));
+
+            TimeUnit.SECONDS.sleep(30);
+            Boolean b = stdInput1.ready();
+            if (b) {
+                while ((s1 = stdInput1.readLine()) != null) {
+                    output.add(s1);
+                }
+                if (2 < output.size()) {
+                    System.out.println(output.get(2));
+                } else {
+                    System.out.println("No Answer");
+                }
+                //System.out.println(output.get(3));
+                while ((s1 = stdError1.readLine()) != null) {
+                    // System.out.println(s1);
+                }
+
             } else {
-                System.out.println("No Answer");
+                System.out.println("False");
             }
-            //System.out.println(output.get(3));
-            while ((s1 = stdError1.readLine()) != null) {
-                // System.out.println(s1);
-            }
+            //System.out.println("No Answer (Time Out)");
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
             questionFlag = scan.nextLine();
+
         } while (!questionFlag.toLowerCase().equals("n"));
+    }
+
+    private static Process runSasp(String queryPath) throws IOException {
+        Runtime rt = getRuntime();
+        Process proc1 = rt.exec("sasp " + queryPath);
+        return proc1;
     }
 
 
