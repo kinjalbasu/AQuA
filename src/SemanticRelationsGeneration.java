@@ -20,7 +20,12 @@ public class SemanticRelationsGeneration {
     private static List<String> dependenciesFacts = new ArrayList<>();
     private static List<String> sementicRelations = new ArrayList<>();
     private static List<String> conceptualRelations = new ArrayList<>();
-
+    public static void initializeLists(){
+        posFacts = new ArrayList<>();
+        dependenciesFacts = new ArrayList<>();
+        sementicRelations = new ArrayList<>();
+        conceptualRelations = new ArrayList<>();
+    }
     public static void generateSemanticRelations(Sentence sentence){
 
         String regexPattern = "^[a-zA-Z0-9-]*$";
@@ -128,7 +133,8 @@ public class SemanticRelationsGeneration {
         return dependenciesFacts;
     }
 
-    public static List<String> getSementicRelations() {
+    public static List<String> getSementicRelations()
+    {
         return sementicRelations;
     }
 

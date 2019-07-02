@@ -12,7 +12,7 @@ size_order([small, medium, big]).
 member(X, [X|_]).
 member(X, [_|T]) :- member(X,T).
 
-nonmember(X,L) :- not member(X,L).
+nonmember(X,L) :- not(member(X,L)).
 
 indexOf([Element|_], Element, 0). 
 indexOf([_|Tail], Element, Index):-
@@ -28,8 +28,8 @@ add_tail([H|T],X,[H|L]) :- add_tail(T,X,L).
 
 gt(A,B) :- A > B.
 gte(A,B) :- A >= B.
-lt(A,B) :- not gte(A,B).
-lte(A,B) :- not gt(A,B).
+lt(A,B) :- not(gte(A,B)).
+lte(A,B) :- not(gt(A,B)).
 
 %~~~~~GET Ids~~~~~~~~~
 %count_id(L1,Id) :- property(Id,_,_), nonmember(Id,L1).
@@ -80,7 +80,7 @@ compare_val(Id1,Id2,y_axis) :- bottom_compare(Id1,Id2).
 
 filter(_,_,[],[]).
 filter(Att,Val,[Id|T1],[Id|T2]) :- property(Id,Att,Val), filter(Att,Val,T1,T2).
-filter(Att,Val,[Id|T1],T2) :- not property(Id,Att,Val),filter(Att,Val,T1,T2).
+filter(Att,Val,[Id|T1],T2) :- not(property(Id,Att,Val)),filter(Att,Val,T1,T2).
 
 filter_all([],Ids,Ids).
 filter_all([[Att,Val]|T],Ids,L) :- filter(Att,Val,Ids,L1),filter_all(T,L1,L). 
@@ -90,7 +90,7 @@ filter_all([[Att,Val]|T],Ids,L) :- filter(Att,Val,Ids,L1),filter_all(T,L1,L).
 
 %filter_all(_,[],[]).
 %filter_all(Filters,[Id|T1],[Id|T2]) :- check(Filters,Id),filter_all(Filters,T1,T2).
-%filter_all(Filters,[Id|T1],T2) :- not check(Filters,Id),filter_all(Filters,T1,T2).
+%filter_all(Filters,[Id|T1],T2) :- not(check(Filters,Id)),filter_all(Filters,T1,T2).
 
 
 
@@ -124,11 +124,11 @@ get_properties([],[]).
 get_properties([X|T1],[[Y,X]|T2]) :- is_property(X,Y),get_properties(T1,T2).
 
 %---Experiment---
-%not_check_shape(X) :- not is_property(X,shape).
-%not_check_shape(X) :- similar(X,Y), not is_property(X,shape). 
+%not_check_shape(X) :- not(is_property(X,shape)).
+%not_check_shape(X) :- similar(X,Y), not(is_property(X,shape)). 
  
-shape(X) :- is_property(X,shape), not ab_shape(X).
-shape(X) :- is_property(Y,shape), similar(X,Y), not ab_shape(X).
+shape(X) :- is_property(X,shape), not(ab_shape(X)).
+shape(X) :- is_property(Y,shape), similar(X,Y), not(ab_shape(X)).
  
 %check_shape(X) :- is_property(X,shape).
 %check_shape(X) :- similar(X,Y), is_property(Y,shape).
@@ -138,7 +138,7 @@ check_shape(X,Y) :- is_property(Y,shape),similar(X,Y).
 
 filters(X,L) :- values(X,L1), get_properties(L1,L). 
 find_all_filters(X,[[shape,Y]|L]) :-  shape(X), check_shape(X,Y), filters(X,L).
-find_all_filters(X,L) :- not shape(X), filters(X,L).
+find_all_filters(X,L) :- not(shape(X)), filters(X,L).
 
 %Get value of an attribute of the first Id of the list.
 get_att_val([H|T],Att,Val) :- property(H,Att,Val).

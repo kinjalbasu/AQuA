@@ -1,8 +1,13 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.jpl7.Query;
+import org.jpl7.Term;
 
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.logging.RedwoodConfiguration;
@@ -12,8 +17,10 @@ import static java.lang.Runtime.getRuntime;
 public class Parent {
     public static final String KNOWLEDGE_PATH = "resources/clevr/clevrKnowledge.lp";
     public static final String QUESTION_PATH = "resources/clevr/clevrQuery.lp";
-    public static final String SEMANTIC_PATH = "resources/semanticRelations.lp";
-    public static final String RULE_PATH = "resources/Rules.lp";
+    public static final String COMMON_FACTS_PATH = "resources/clevr/clevrCommonFacts.lp";
+    public static final String RULE_PATH = "resources/clevr/clevrRules.lp";
+    public static final String SEMANTIC_PATH = "resources/clevr/clevrSemanticRules.lp";
+   // public static final String RULE_PATH = "resources/Rules.lp";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         RedwoodConfiguration.current().clear().apply();
@@ -41,7 +48,7 @@ public class Parent {
         String semanticPath = new File(SEMANTIC_PATH).getCanonicalPath();
         String knowledgePath = new File(KNOWLEDGE_PATH).getCanonicalPath();
         String rulesPath = new File(RULE_PATH).getCanonicalPath();
-        ;
+
         String queryPath = new File(QUESTION_PATH).getCanonicalPath();
 
 
@@ -115,23 +122,23 @@ public class Parent {
 
 
         do {
-            System.out.print("Question = ");
-            String question = scan.nextLine();
-            //String question = "Is there a red block ?";
-            //String question = "Is there a red nonmetal block ?";
-            //String question = "Are there two red blocks ?";
+            //System.out.print("Question = ");
+            //String question = scan.nextLine();
+            String question = "is there a nonmetal object of the same size as the blue block ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
-            bw3.write("#include 'clevrKnowledge.lp'.\n" +
-                    "#include 'clevrRules.lp'.\n" +
-                    "#include 'clevrSemanticRules.lp'.\n" +
-                    "#include 'clevrCommonFacts.lp'.");
+            bw3.write(":- include('clevrKnowledge.pl').\n" +
+                    ":- include('clevrRules.pl').\n" +
+                    ":- include('clevrSemanticRules.pl').\n" +
+                    ":- include('clevrCommonFacts.pl').");
             bw3.newLine();
 
             Scasp_question.printQuestion(question, bw3);
-            bw3.write("?- query(Q,A).");
             bw3.close();
-            Runtime rt = getRuntime();
+            generatePrologCompatibleCode();
+            //bw3.write("?- query(Q,A).");
+            //bw3.close();
+            /*Runtime rt = getRuntime();
             System.out.println("Sasp invoked");
             Process proc1 = rt.exec("sasp " + queryPath);
 
@@ -147,24 +154,31 @@ public class Parent {
             String s1 = null;
             List<String> output = new ArrayList<>();
 
-            TimeUnit.SECONDS.sleep(30);
-            Boolean b = stdInput1.ready();
-            if (b) {
-                while ((s1 = stdInput1.readLine()) != null) {
-                    output.add(s1);
-                }
-                if (2 < output.size()) {
-                    System.out.println(output.get(2));
-                } else {
-                    System.out.println("No Answer");
-                }
-                //System.out.println(output.get(3));
-                while ((s1 = stdError1.readLine()) != null) {
-                    // System.out.println(s1);
-                }
 
+            while ((s1 = stdInput1.readLine()) != null) {
+                output.add(s1);
+            }
+            if (2 < output.size()) {
+                System.out.println(output.get(2));
             } else {
-                System.out.println("False");
+                System.out.println("No Answer");
+            }
+            //System.out.println(output.get(3));
+            while ((s1 = stdError1.readLine()) != null) {
+                // System.out.println(s1);
+            }*/
+
+            String t = "consult('resources/clevrProlog/clevrQuery.pl')";
+            Query q = new Query(t);
+            if(!q.hasSolution()){
+                System.out.println("Fails");
+            }
+            else{
+                //t = "get_all_id(Ids),filter_all([[shape,cube],[color,blue]],Ids,L1),filter_all([[material,nonmetal]],Ids,L2).";
+                q = new Query("query(Q,A).");
+                Map<String, Term>[] map = q.allSolutions();
+                System.out.println("Question : " + map[0].get("Q"));
+                System.out.println("Answer : " + map[0].get("A"));
             }
             //System.out.println("No Answer (Time Out)");
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
@@ -173,11 +187,53 @@ public class Parent {
         } while (!questionFlag.toLowerCase().equals("n"));
     }
 
-    private static Process runSasp(String queryPath) throws IOException {
+    private static void generatePrologCompatibleCode() throws IOException {
+        List<String> clevrFiles = Files.walk(Paths.get("resources/clevr"))
+                .filter(Files::isRegularFile)
+                .map(f -> f.toString()).collect(Collectors.toList());
+
+        String clevrPrologDirPath = "resources/clevrProlog";
+        for(String f : clevrFiles){
+            String newFileName = f.substring(f.lastIndexOf('\\')+1,f.indexOf('.')) + ".pl";
+            FileWriter fw = new FileWriter(new File(clevrPrologDirPath + File.separator + newFileName));
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            FileReader fr = new FileReader(new File(f));
+            BufferedReader br = new BufferedReader(fr);
+            String s = br.readLine();
+            while(s != null){
+                if ( s.contains("not ")){
+                    String[] sARR = s.split("not ");
+                    String s2 = sARR[0];
+                    for(int i = 1; i < sARR.length; i++){
+                        s2 += "not(" + sARR[i].replaceFirst("\\)","))");
+
+                    }
+                    bw.write(s2);
+                    bw.newLine();
+                }
+                else if (s.startsWith("_")){
+                    bw.write(s.replaceFirst("_",""));
+                    bw.newLine();
+                }
+                else {
+                    bw.write(s);
+                    bw.newLine();
+                }
+                s = br.readLine();
+            }
+            br.close();
+            bw.close();
+        }
+        System.out.println("Hello");
+    }
+
+   /* private static Process runSasp(String queryPath) throws IOException {
         Runtime rt = getRuntime();
         Process proc1 = rt.exec("sasp " + queryPath);
         return proc1;
-    }
+    }*/
+
 
 
 }

@@ -20,6 +20,7 @@ public class KnowledgeGeneration {
         List<Sentence> sentenceList = new ArrayList<>();
         String[] sentencesString = content.split(END_OF_SENTENCE);
         Set<String> nouns = new HashSet<>();
+        SemanticRelationsGeneration.initializeLists();
         for(String sentenceString : sentencesString){
            // /*******************/System.out.println(sentenceString);
             Sentence sentence = Sentence.ParseSentence(sentenceString.trim());
