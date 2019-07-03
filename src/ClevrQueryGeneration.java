@@ -28,7 +28,8 @@ public class ClevrQueryGeneration {
             rules.addAll(getExistentialRule(nouns.get(0)));
         }
         else if(question.semanticRoot.getPOSTag().toLowerCase().matches("vbz") &&
-                !question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).isEmpty()){
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("expl",new ArrayList<>()).isEmpty()){
             rules.addAll(getComplexExistentialRule(question));
         }
         else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("nn") &&
@@ -36,6 +37,11 @@ public class ClevrQueryGeneration {
                 question.semanticRoot.getRelationMap().getOrDefault("amod",new ArrayList<>())
                         .get(0).getPOSTag().equalsIgnoreCase("jj")){
             rules.addAll(getComparisonRules(question));
+        }
+        else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("jj") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).isEmpty()){
+            rules.addAll(getComparisonRules(question));
+
         }
         rules = modifyCommonQueryRules(rules, true);
         //return getCommonQueryRules(rules,true);
@@ -251,7 +257,8 @@ public class ClevrQueryGeneration {
 
     private static List<Rule> getComparisonRules(Question question) {
         List<Rule> rules = new ArrayList<>();
-        if(question.semanticRoot.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")){
+        if(!question.semanticRoot.getRelationMap().getOrDefault("amod",new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")){
             String comparisonAttribute = question.semanticRoot.getLemma();
             TypedDependency c1 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nsubj")
@@ -263,55 +270,74 @@ public class ClevrQueryGeneration {
                             && d.gov().value().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             String comparator2 = c2 != null ? c2.dep().value(): null;
-
-            if(comparisonAttribute != null && comparator1 != null && comparator2 != null){
-                Literal head = null;
-                List<Literal> body = new ArrayList<>();
-
-                List<Literal> terms = new ArrayList<>();
-                terms.add(new Literal(new Word(comparator1, false)));
-                terms.add(new Literal(new Word("L1", true)));
-                body.add(new Literal(new Word("find_all_filters", false), terms));
-
-
-                terms = new ArrayList<>();
-                terms.add(new Literal(new Word(comparator2, false)));
-                terms.add(new Literal(new Word("L2", true)));
-                body.add(new Literal(new Word("find_all_filters", false), terms));
-
-
-                terms = new ArrayList<>();
-                terms.add(new Literal(new Word("L1", true)));
-                terms.add(new Literal(new Word("Ids1", true)));
-                body.add(new Literal(new Word("list_object", false), terms));
-
-
-                terms = new ArrayList<>();
-                terms.add(new Literal(new Word("L2", true)));
-                terms.add(new Literal(new Word("Ids2", true)));
-                body.add(new Literal(new Word("list_object", false), terms));
-
-
-                terms = new ArrayList<>();
-                terms.add(new Literal(new Word("Ids1", true)));
-                terms.add(new Literal(new Word(comparisonAttribute, false)));
-                terms.add(new Literal(new Word("Val", true)));
-                body.add(new Literal(new Word("get_att_val", false), terms));
-
-                terms = new ArrayList<>();
-                terms.add(new Literal(new Word("Ids2", true)));
-                terms.add(new Literal(new Word(comparisonAttribute, false)));
-                terms.add(new Literal(new Word("Val", true)));
-                body.add(new Literal(new Word("get_att_val", false), terms));
-
-                rules.add(new Rule(head, body, true));
-            }
-
+            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2));
+        }
+        else if(question.semanticRoot.getLemma().equalsIgnoreCase("same")){
+            String comparisonAttribute = question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).get(0).getLemma();
+            TypedDependency c1 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                    && d.gov().value().equalsIgnoreCase(comparisonAttribute))
+                    .findFirst().orElse(null);
+            String comparator1 = c1 != null ? c1.dep().value() : null;
+            TypedDependency c2 = question.dependencies.stream()
+                    .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                            && d.gov().value().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                    .findFirst().orElse(null);
+            String comparator2 = c2 != null ? c2.dep().value(): null;
+            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2));
         }
 
 
         return rules;
     }
+
+    private static Rule getEqualComparisonRules(String comparisonAttribute, String comparator1, String comparator2) {
+        Rule r = null;
+        if(comparisonAttribute != null && comparator1 != null && comparator2 != null){
+            Literal head = null;
+            List<Literal> body = new ArrayList<>();
+
+            List<Literal> terms = new ArrayList<>();
+            terms.add(new Literal(new Word(comparator1, false)));
+            terms.add(new Literal(new Word("L1", true)));
+            body.add(new Literal(new Word("find_all_filters", false), terms));
+
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word(comparator2, false)));
+            terms.add(new Literal(new Word("L2", true)));
+            body.add(new Literal(new Word("find_all_filters", false), terms));
+
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("L1", true)));
+            terms.add(new Literal(new Word("Ids1", true)));
+            body.add(new Literal(new Word("list_object", false), terms));
+
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("L2", true)));
+            terms.add(new Literal(new Word("Ids2", true)));
+            body.add(new Literal(new Word("list_object", false), terms));
+
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("Ids1", true)));
+            terms.add(new Literal(new Word(comparisonAttribute, false)));
+            terms.add(new Literal(new Word("Val", true)));
+            body.add(new Literal(new Word("get_att_val", false), terms));
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("Ids2", true)));
+            terms.add(new Literal(new Word(comparisonAttribute, false)));
+            terms.add(new Literal(new Word("Val", true)));
+            body.add(new Literal(new Word("get_att_val", false), terms));
+
+            r = new Rule(head, body, true);
+        }
+        return r;
+    }
+
+
     private static Map<Word, List<Word>> getProperties(Question question, List<Word> nouns) {
         Map<Word, List<Word>> properties = new HashMap<>();
 

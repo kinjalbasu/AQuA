@@ -123,22 +123,18 @@ order_bottom_to_top(L) :- get_all_id(L1), mergesort(L1,L,y_axis).
 get_properties([],[]).
 get_properties([X|T1],[[Y,X]|T2]) :- is_property(X,Y),get_properties(T1,T2).
 
-%---Experiment---
-%not_check_shape(X) :- not is_property(X,shape).
-%not_check_shape(X) :- similar(X,Y), not is_property(X,shape). 
+%---shape checking------
  
-shape(X) :- is_property(X,shape), not ab_shape(X).
-shape(X) :- is_property(Y,shape), similar(X,Y), not ab_shape(X).
- 
-%check_shape(X) :- is_property(X,shape).
-%check_shape(X) :- similar(X,Y), is_property(Y,shape).
+%shape(X) :- is_property(X,shape).
+%shape(X) :- is_property(Y,shape), similar(X,Y).
+
 check_shape(X,X) :- is_property(X,shape).
 check_shape(X,Y) :- is_property(Y,shape),similar(X,Y).
 %--------
 
 filters(X,L) :- values(X,L1), get_properties(L1,L). 
-find_all_filters(X,[[shape,Y]|L]) :-  shape(X), check_shape(X,Y), filters(X,L).
-find_all_filters(X,L) :- not shape(X), filters(X,L).
+find_all_filters(X,[[shape,Y]|L]) :-  check_shape(X,Y), filters(X,L).
+find_all_filters(X,L) :- not check_shape(X,Y), filters(X,L).
 
 %Get value of an attribute of the first Id of the list.
 get_att_val([H|T],Att,Val) :- property(H,Att,Val).

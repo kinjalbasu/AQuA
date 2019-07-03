@@ -7,12 +7,11 @@ is_property(purple,color).
 is_property(pink,color).
 is_property(yellow,color).
 is_property(blue,color).
+is_property(cyan,color).
 
 is_property(cube,shape).
 is_property(cylinder,shape).
 is_property(sphere,shape).
-
-ab_shape(object).
 
 is_property(nonmetal,material).
 is_property(metal,material).

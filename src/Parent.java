@@ -124,7 +124,7 @@ public class Parent {
         do {
             //System.out.print("Question = ");
             //String question = scan.nextLine();
-            String question = "is there a nonmetal object of the same size as the blue block ?";
+            String question = "Is the size of the ball the same as the cyan thing ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write(":- include('clevrKnowledge.pl').\n" +
