@@ -132,9 +132,9 @@ check_shape(X,X) :- is_property(X,shape).
 check_shape(X,Y) :- is_property(Y,shape),similar(X,Y).
 %--------
 
-filters(X,L) :- values(X,L1), get_properties(L1,L). 
-find_all_filters(X,[[shape,Y]|L]) :-  check_shape(X,Y), filters(X,L).
-find_all_filters(X,L) :- not(check_shape(X,Y)), filters(X,L).
+filters(X,Id,L) :- values(X,Id,L1), get_properties(L1,L).
+find_all_filters(X,Id,[[shape,Y]|L]) :-  check_shape(X,Y), filters(X,Id,L).
+find_all_filters(X,Id,L) :- not(check_shape(X,Y)), filters(X,Id,L).
 
 %Get value of an attribute of the first Id of the list.
 get_att_val([H|T],Att,Val) :- property(H,Att,Val).

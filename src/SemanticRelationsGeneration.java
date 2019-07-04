@@ -36,7 +36,7 @@ public class SemanticRelationsGeneration {
                 String pos = word.getPOSTag().toLowerCase().replaceAll("\\$", "_po");
                 if (pos.contains("-")) pos = pos.split("-")[0];
 
-                String s = "_pos(" + w + "," + pos + ").";
+                String s = "_pos(" + w+ "_"+word.getWordIndex() + "," + pos + ").";
                 //System.out.println(s);
                 posFacts.add(s);
 
@@ -66,7 +66,7 @@ public class SemanticRelationsGeneration {
 
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
-            String s = "_" + relation + "(" + gov + "," + dep + ").";
+            String s = "_" + relation + "(" + gov+"_"+dependency.gov().index() + "," + dep +"_"+dependency.dep().index()+ ").";
             dependenciesFacts.add(s);
 
 
@@ -82,8 +82,16 @@ public class SemanticRelationsGeneration {
                     && lemmaPosMap.get(dep).equalsIgnoreCase("nnp")) {
                 sementicRelations.add(getSynonymRule(gov, dep));
             }
+
+            if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an")){
+                sementicRelations.add(getQuantificationRule(dependency));
+            }
         }
 
+    }
+
+    private static String getQuantificationRule(TypedDependency dependency) {
+        return "quantification(1,"+ dependency.gov().backingLabel().toString().replace("-","_") + ").";
     }
 
     public static List<String> getConcept(String w) {

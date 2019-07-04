@@ -23,21 +23,25 @@ public class ClevrQueryGeneration {
         //Map<String,List<String>> commonSenseConceptsMap = nouns.stream().collect(Collectors.toMap(n -> n.getWord(), n-> SemanticRelationsGeneration.getConcept(n.getWord())));
 
         generateFacts(question,nouns);
-        //Map<Word,List<Word>> properties = getProperties(question,nouns);
+        //Is there a tiny cyan matte ball?
         if (nouns.size() == 1) {
             rules.addAll(getExistentialRule(nouns.get(0)));
         }
+        //Is there a cylinder of the same color as the rubber object?
         else if(question.semanticRoot.getPOSTag().toLowerCase().matches("vbz") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).isEmpty() &&
                 !question.semanticRoot.getRelationMap().getOrDefault("expl",new ArrayList<>()).isEmpty()){
             rules.addAll(getComplexExistentialRule(question));
         }
+        //Is the brown thing the same size as the red matte cylinder?
         else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("nn") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("amod",new ArrayList<>()).isEmpty() &&
                 question.semanticRoot.getRelationMap().getOrDefault("amod",new ArrayList<>())
                         .get(0).getPOSTag().equalsIgnoreCase("jj")){
             rules.addAll(getComparisonRules(question));
         }
+
+        //Is the size of the cyan thing the same as the red cylinder?
         else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("jj") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).isEmpty()){
             rules.addAll(getComparisonRules(question));
@@ -143,6 +147,7 @@ public class ClevrQueryGeneration {
 
         List<Literal> terms = new ArrayList<>();
         terms.add(new Literal(new Word(word.getLemma(), false)));
+        terms.add(new Literal(new Word(Integer.toString(word.getWordIndex()), false)));
         terms.add(new Literal(new Word("L", true)));
         body.add(new Literal(new Word("find_all_filters", false), terms));
 
@@ -158,7 +163,7 @@ public class ClevrQueryGeneration {
 
         terms = new ArrayList<>();
         terms.add(new Literal(new Word("N", true)));
-        terms.add(new Literal(new Word(word.getLemma(), false)));
+        terms.add(new Literal(new Word(word.getLemma()+"_"+word.getWordIndex(), false)));
         body.add(new Literal(new Word("quantification", false), terms));
 
         terms = new ArrayList<>();
@@ -176,6 +181,7 @@ public class ClevrQueryGeneration {
         List<Rule> rules = new ArrayList<>();
 
         String exitentialItem = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
+        String existentialIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
         TypedDependency c1 = question.dependencies.stream()
                 .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                         && d.reln().getSpecific().equalsIgnoreCase("as")
@@ -197,6 +203,7 @@ public class ClevrQueryGeneration {
 
             List<Literal> terms = new ArrayList<>();
             terms.add(new Literal(new Word(comparator, false)));
+            terms.add(new Literal(new Word(Integer.toString(c1.dep().index()), false)));
             terms.add(new Literal(new Word("L1", true)));
             body.add(new Literal(new Word("find_all_filters", false), terms));
 
@@ -214,6 +221,7 @@ public class ClevrQueryGeneration {
 
             terms = new ArrayList<>();
             terms.add(new Literal(new Word(exitentialItem, false)));
+            terms.add(new Literal(new Word(existentialIndex, false)));
             terms.add(new Literal(new Word("L2", true)));
             body.add(new Literal(new Word("find_all_filters", false), terms));
 
@@ -240,7 +248,7 @@ public class ClevrQueryGeneration {
 
             terms = new ArrayList<>();
             terms.add(new Literal(new Word("N", true)));
-            terms.add(new Literal(new Word(exitentialItem, false)));
+            terms.add(new Literal(new Word(exitentialItem+"_"+existentialIndex, false)));
             body.add(new Literal(new Word("quantification", false), terms));
 
             terms = new ArrayList<>();
@@ -265,12 +273,14 @@ public class ClevrQueryGeneration {
                             && d.gov().value().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             String comparator1 = c1 != null ? c1.dep().value() : null;
+            String comparator1Index = Integer.toString(c1.dep().index());
             TypedDependency c2 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                             && d.gov().value().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             String comparator2 = c2 != null ? c2.dep().value(): null;
-            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2));
+            String comparator2Index = Integer.toString(c2.dep().index());
+            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2,comparator1Index,comparator2Index));
         }
         else if(question.semanticRoot.getLemma().equalsIgnoreCase("same")){
             String comparisonAttribute = question.semanticRoot.getRelationMap().getOrDefault("nsubj",new ArrayList<>()).get(0).getLemma();
@@ -278,19 +288,21 @@ public class ClevrQueryGeneration {
                     && d.gov().value().equalsIgnoreCase(comparisonAttribute))
                     .findFirst().orElse(null);
             String comparator1 = c1 != null ? c1.dep().value() : null;
+            String comparator1Index = Integer.toString(c1.dep().index());
             TypedDependency c2 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                             && d.gov().value().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             String comparator2 = c2 != null ? c2.dep().value(): null;
-            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2));
+            String comparator2Index = Integer.toString(c2.dep().index());
+            rules.add(getEqualComparisonRules(comparisonAttribute,comparator1,comparator2,comparator1Index,comparator2Index));
         }
 
 
         return rules;
     }
 
-    private static Rule getEqualComparisonRules(String comparisonAttribute, String comparator1, String comparator2) {
+    private static Rule getEqualComparisonRules(String comparisonAttribute, String comparator1, String comparator2, String comparator1Index, String comparator2Index) {
         Rule r = null;
         if(comparisonAttribute != null && comparator1 != null && comparator2 != null){
             Literal head = null;
@@ -298,12 +310,14 @@ public class ClevrQueryGeneration {
 
             List<Literal> terms = new ArrayList<>();
             terms.add(new Literal(new Word(comparator1, false)));
+            terms.add(new Literal(new Word(comparator1Index, false)));
             terms.add(new Literal(new Word("L1", true)));
             body.add(new Literal(new Word("find_all_filters", false), terms));
 
 
             terms = new ArrayList<>();
             terms.add(new Literal(new Word(comparator2, false)));
+            terms.add(new Literal(new Word(comparator2Index, false)));
             terms.add(new Literal(new Word("L2", true)));
             body.add(new Literal(new Word("find_all_filters", false), terms));
 
@@ -421,14 +435,14 @@ public class ClevrQueryGeneration {
         List<String> valuesFindAll = new ArrayList<>();
         Map<String,List<String>> valueMap = new HashMap<>();
         for(Word n : nouns){
-            valueMap.put(n.getLemma(), new ArrayList<>());
+            valueMap.put(n.getLemma()+"_"+n.getWordIndex(), new ArrayList<>());
         }
         values.stream().forEach(s -> {
             String[] keyVal = s.substring(s.indexOf("(") + 1, s.indexOf(")")).split(",");
-            valueMap.get(keyVal[1]).add(keyVal[0]);
+            valueMap.get(keyVal[1]).add(keyVal[0].split("_")[0]);
         });
         valueMap.forEach((k,v)-> {
-            String val = "values("+ k + ",["+v.stream().collect(Collectors.joining(","))+"]).";
+            String val = "values("+ k.split("_")[0]+"," + k.split("_")[1] + ",["+v.stream().collect(Collectors.joining(","))+"]).";
             valuesFindAll.add(val);
         });
         return valuesFindAll;

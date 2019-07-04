@@ -44,7 +44,7 @@ public class Literal implements Comparable<Literal> {
         this.predicate = atom.getLemma();
         if((!atom.isVariable && IsMixedCase(this.predicate) || this.predicate.contains(".") ||
             this.predicate.contains(",") || this.predicate.contains(" ") || IsSASPKeyword(this.predicate))
-                && !this.predicate.contains("[") ){
+                && !this.predicate.contains("[") && !this.predicate.contains("_") ){
             this.predicate = String.format("'%s'", this.predicate);
         }
         this.isAtom = true;
