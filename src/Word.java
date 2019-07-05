@@ -91,14 +91,14 @@ public class Word {
         }
 
         // Misinterpreting Verb as Noun
-        if (relationName.equalsIgnoreCase("dobj") ||
+/*        if (relationName.equalsIgnoreCase("dobj") ||
                 (relationName.equalsIgnoreCase("nmod") && relation.getSpecific() != null &&
                         relation.getSpecific().equalsIgnoreCase("agent"))) {
             if (this.getPOSTag().startsWith("NN")) {
                 this.POSTag = String.format("VB-%s", this.POSTag);
                 this.id = String.valueOf(this.eventId++);
             }
-        }
+        }*/
 
         String specific = relation.getSpecific();
         if (relationName.equals("nmod") && specific != null) {
