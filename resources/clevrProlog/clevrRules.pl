@@ -122,6 +122,7 @@ order_bottom_to_top(L) :- get_all_id(L1), mergesort(L1,L,y_axis).
 
 get_properties([],[]).
 get_properties([X|T1],[[Y,X]|T2]) :- is_property(X,Y),get_properties(T1,T2).
+get_properties([X|T1],T2) :- not(is_property(X,Y)),get_properties(T1,T2).
 
 %---shape checking------
  

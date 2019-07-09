@@ -2,8 +2,8 @@
 :- include('clevrRules.pl').
 :- include('clevrSemanticRules.pl').
 :- include('clevrCommonFacts.pl').
-find_ans(Q) :- question(Q),find_all_filters(cylinder, 14, L1),list_object(L1, Ids1),get_att_val(Ids1, size, Val),find_all_filters(sphere, 6, L2),list_object([[size,Val]|L2], Ids2),list_subtract(Ids2, Ids1, Ids),list_length(Ids, C),quantification(N, sphere_6),gte(C, N).
-question('is there a blue nonmetal sphere that has the same size as the cylinder ?').
-question_answer('is there a blue nonmetal sphere that has the same size as the cylinder ?', true) :- find_ans('is there a blue nonmetal sphere that has the same size as the cylinder ?').
-question_answer('is there a blue nonmetal sphere that has the same size as the cylinder ?', false) :- not(find_ans('is there a blue nonmetal sphere that has the same size as the cylinder ?')).
+find_ans(Q) :- question(Q),find_all_filters(block, 5, L1),list_object(L1, Ids1),list_length(Ids1, C1),find_all_filters(cylinder, 12, L2),list_object(L2, Ids2),list_length(Ids2, C2),gt(C1, C2).
+question('is the number of blocks greater than the number of yellow cylinders ?').
+question_answer('is the number of blocks greater than the number of yellow cylinders ?', true) :- find_ans('is the number of blocks greater than the number of yellow cylinders ?').
+question_answer('is the number of blocks greater than the number of yellow cylinders ?', false) :- not(find_ans('is the number of blocks greater than the number of yellow cylinders ?')).
 query(Q, A) :- question(Q),question_answer(Q, A).
