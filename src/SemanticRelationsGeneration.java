@@ -1,5 +1,6 @@
 import com.sun.javafx.fxml.builder.URLBuilder;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.util.StringUtils;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
@@ -35,14 +36,19 @@ public class SemanticRelationsGeneration {
             if (w.matches(regexPattern)) {
                 String pos = word.getPOSTag().toLowerCase().replaceAll("\\$", "_po");
                 if (pos.contains("-")) pos = pos.split("-")[0];
-
-                String s = "_pos(" + w+ "_"+word.getWordIndex() + "," + pos + ").";
+                String s =null;
+                if(StringUtils.isNumeric(w)){
+                    s = "_pos(" + w + "," + pos + ").";
+                }
+                else{
+                    s = "_pos(" + w+ "_"+word.getWordIndex() + "," + pos + ").";
+                }
                 //System.out.println(s);
                 posFacts.add(s);
 
 
                 //~~~~~Adding ConceptNet
-                if (pos.matches("nn|nnp|nns|nnps")) {
+               /* if (pos.matches("nn|nnp|nns|nnps")) {
                     List<String> conceptList = null;
                     conceptList = getConcept(w);
 
@@ -52,7 +58,7 @@ public class SemanticRelationsGeneration {
                         }
 
                     }
-                }
+                }*/
             }
 
 
@@ -66,7 +72,19 @@ public class SemanticRelationsGeneration {
 
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
-            String s = "_" + relation + "(" + gov+"_"+dependency.gov().index() + "," + dep +"_"+dependency.dep().index()+ ").";
+            String s = null;
+            if(!StringUtils.isNumeric(gov) && !StringUtils.isNumeric(dep)) {
+                s = "_" + relation + "(" + gov + "_" + dependency.gov().index() + "," + dep + "_" + dependency.dep().index() + ").";
+            }
+            else if(StringUtils.isNumeric(gov) && !StringUtils.isNumeric(dep)) {
+                s = "_" + relation + "(" + gov + "," + dep + "_" + dependency.dep().index() + ").";
+            }
+            else if(!StringUtils.isNumeric(gov) && StringUtils.isNumeric(dep)) {
+                s = "_" + relation + "(" + gov + "_" + dependency.gov().index() + "," + dep + ").";
+            }
+            else{
+                s = "_" + relation + "(" + gov + "," + dep + ").";
+            }
             dependenciesFacts.add(s);
 
 
