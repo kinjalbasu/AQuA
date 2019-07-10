@@ -365,8 +365,6 @@ public class ClevrQueryGeneration {
 
             rules.add(getArithmaticRulesBody(object1,object1Index,object2,object2Index,comparatorWord.get()));
         }
-
-
         return rules;
     }
 

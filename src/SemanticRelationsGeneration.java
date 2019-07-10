@@ -47,6 +47,12 @@ public class SemanticRelationsGeneration {
                 posFacts.add(s);
 
 
+                //check 'anything' or not for quantification 1 (needed for existential queries). e.g. "is there anything....."
+
+                if(w.equalsIgnoreCase("anything") && word.getPOSTag().equalsIgnoreCase("nn")){
+                    sementicRelations.add("quantification(1,"+w+"_"+word.getWordIndex()+").");
+                }
+
                 //~~~~~Adding ConceptNet
                /* if (pos.matches("nn|nnp|nns|nnps")) {
                     List<String> conceptList = null;
@@ -104,6 +110,7 @@ public class SemanticRelationsGeneration {
             if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an")){
                 sementicRelations.add(getQuantificationRule(dependency));
             }
+
         }
 
     }

@@ -15,6 +15,8 @@ is_property(sphere,shape).
 
 is_property(nonmetal,material).
 is_property(metal,material).
+is_property(metallic,material).
+is_property(matte,material).
 
 is_property(small,size).
 is_property(medium,size).
@@ -24,3 +26,4 @@ is_property(tiny,size).
 
 is_similar(block,cube).
 is_similar(ball,sphere).
+
