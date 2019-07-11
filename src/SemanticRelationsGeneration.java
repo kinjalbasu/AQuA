@@ -52,6 +52,10 @@ public class SemanticRelationsGeneration {
                 if(w.equalsIgnoreCase("anything") && word.getPOSTag().equalsIgnoreCase("nn")){
                     sementicRelations.add("quantification(1,"+w+"_"+word.getWordIndex()+").");
                 }
+                if(w.equalsIgnoreCase("thing") && sentence.wordList.get(word.getWordIndex() - 2).getLemma().equalsIgnoreCase("other")){
+                    sementicRelations.add("quantification(1,"+w+"_"+word.getWordIndex()+").");
+
+                }
 
                 //~~~~~Adding ConceptNet
                /* if (pos.matches("nn|nnp|nns|nnps")) {
@@ -76,8 +80,14 @@ public class SemanticRelationsGeneration {
             if (relation.equalsIgnoreCase("root")
                     || relation.equalsIgnoreCase("punct")) continue;
 
+
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
+
+            if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("metal")){
+                relation = "amod";
+            }
+
             String s = null;
             if(!StringUtils.isNumeric(gov) && !StringUtils.isNumeric(dep)) {
                 s = "_" + relation + "(" + gov + "_" + dependency.gov().index() + "," + dep + "_" + dependency.dep().index() + ").";

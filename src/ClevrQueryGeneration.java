@@ -228,12 +228,16 @@ public class ClevrQueryGeneration {
                 String comparator = comparisonAttribute.getRelationMap().get("nmod:as").get(0).getLemma();
                 String comparatorIndex = Integer.toString(comparisonAttribute.getRelationMap().get("nmod:as").get(0).getWordIndex());
                 rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute.getLemma()));
-            } else {
+            } else if (!w.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty()) {
                 String comparisonAttribute = w.getRelationMap().get("dobj").get(0).getLemma();
                 String comparator = w.getRelationMap().get("nmod:as").get(0).getLemma();
                 String comparatorIndex = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
                 rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
-
+            } else {
+                String comparisonAttribute = w.getLemma();
+                String comparator = w.getRelationMap().get("nmod:as").get(0).getLemma();
+                String comparatorIndex = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
+                rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
             }
         } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
             String existentialItem = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
@@ -333,17 +337,15 @@ public class ClevrQueryGeneration {
             String comparator2 = c2 != null ? c2.dep().value() : null;
             String comparator2Index = Integer.toString(c2.dep().index());
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
-        }
-        else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
+        } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
             String comparator1 = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
             String comparator1Index = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
             Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0);
             String comparisonAttribute = w.getRelationMap().get("nmod:of").get(0).getLemma();
             String comparator2 = w.getRelationMap().get("nmod:as").get(0).getLemma();
             String comparator2Index = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
-            if(!w.getRelationMap().get("nmod:of").get(0).getRelationMap().getOrDefault("amod",new ArrayList<>()).isEmpty() &&
-                    w.getRelationMap().get("nmod:of").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same"))
-            {
+            if (!w.getRelationMap().get("nmod:of").get(0).getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty() &&
+                    w.getRelationMap().get("nmod:of").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")) {
                 rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
             }
         }

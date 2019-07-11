@@ -118,6 +118,7 @@ public class Word {
         return this.POSTag;
     }
 
+
     public NamedEntityTagger.NamedEntityTags getNERTag() {
         return this.NERTag;
     }
@@ -150,6 +151,11 @@ public class Word {
     public void setLemma(String lemma) {
         this.lemma = lemma;
     }
+
+    public void setPOSTag(String posTag) {
+        this.POSTag = posTag;
+    }
+
 
     public List<Rule> GenerateRules() {
         if (this.IsVerb()) {

@@ -33,7 +33,7 @@ public class Scasp_question {
         // TODO code application logic here
         //String content = "Since what year did ABC stylize abc's logo, as abc ?";
         Question question = new Question(content);
-        List<Rule> rules = ClevrQueryGeneration.getClevrQuery(question);
+        List<Rule> rules = ClevrQueryGeneration.getClevrQuery(filteredCorrectedParsing(question));
         //System.out.println(Sentence.DependenciesToString(question));
         //----------------------------------------------------------------------------------------------------
         /*if (question.information.questionType == QuestionType.WHO && question.semanticRoot.getPOSTag().equals("NN")){
@@ -64,5 +64,17 @@ public class Scasp_question {
             bw.write(String.format("%s.", rule.toString()));
             bw.newLine();
         }
+    }
+
+    private static Question filteredCorrectedParsing(Question question) {
+        //POS correction
+        question.wordList.stream().forEach(w -> {
+            if(w.getLemma().equalsIgnoreCase("metal") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
+        });
+
+        return question;
+
     }
 }
