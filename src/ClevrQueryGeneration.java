@@ -235,6 +235,15 @@ public class ClevrQueryGeneration {
                 rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
 
             }
+        } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
+            String existentialItem = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
+            String existentialIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
+            Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0);
+            String comparisonAttribute = w.getRelationMap().get("nmod:of").get(0).getLemma();
+            String comparator = w.getRelationMap().get("nmod:as").get(0).getLemma();
+            String comparatorIndex = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
+            rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
+
         }
 
         //if(comparisonAttribute != null && exitentialItem != null && comparator != null){
@@ -325,6 +334,19 @@ public class ClevrQueryGeneration {
             String comparator2Index = Integer.toString(c2.dep().index());
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
         }
+        else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
+            String comparator1 = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
+            String comparator1Index = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
+            Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0);
+            String comparisonAttribute = w.getRelationMap().get("nmod:of").get(0).getLemma();
+            String comparator2 = w.getRelationMap().get("nmod:as").get(0).getLemma();
+            String comparator2Index = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
+            if(!w.getRelationMap().get("nmod:of").get(0).getRelationMap().getOrDefault("amod",new ArrayList<>()).isEmpty() &&
+                    w.getRelationMap().get("nmod:of").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same"))
+            {
+                rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+            }
+        }
 
 
         return rules;
@@ -347,13 +369,12 @@ public class ClevrQueryGeneration {
             String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
                     .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
 
-            rules.add(getArithmaticRulesBody(object1,object1Index,object2,object2Index,comparatorWord.get()));
-        }
-        else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-RBR")
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get()));
+        } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-RBR")
                 && comparatorWord.get().getLemma().matches("less|greater") &&
                 !comparatorWord.get().getRelationMap().getOrDefault("nmod:than", new ArrayList<>()).isEmpty()) {
 
-            TypedDependency c1 =question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("nmod")
+            TypedDependency c1 = question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("nmod")
                     && r.gov().value().equalsIgnoreCase("number")).findFirst().orElse(null);
             //String object1 = c1 != null ? c1.gov().value() : null;
             String object1Index = c1 != null ? Integer.toString(c1.dep().index()) : null;
@@ -363,7 +384,7 @@ public class ClevrQueryGeneration {
             String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
                     .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
 
-            rules.add(getArithmaticRulesBody(object1,object1Index,object2,object2Index,comparatorWord.get()));
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get()));
         }
         return rules;
     }
@@ -407,10 +428,9 @@ public class ClevrQueryGeneration {
         terms = new ArrayList<>();
         terms.add(new Literal(new Word("C1", true)));
         terms.add(new Literal(new Word("C2", true)));
-        if(word.getLemma().equalsIgnoreCase("less")){
+        if (word.getLemma().equalsIgnoreCase("less")) {
             body.add(new Literal(new Word("lt", false), terms));
-        }
-        else if(word.getLemma().equalsIgnoreCase("greater")){
+        } else if (word.getLemma().equalsIgnoreCase("greater")) {
             body.add(new Literal(new Word("gt", false), terms));
         }
         return new Rule(head, body, true);
