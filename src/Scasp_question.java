@@ -29,8 +29,6 @@ public class Scasp_question {
 
         TestSetupParser();
         InitializeTest();
-
-        // TODO code application logic here
         //String content = "Since what year did ABC stylize abc's logo, as abc ?";
         Question question = new Question(content);
         List<Rule> rules = ClevrQueryGeneration.getClevrQuery(filteredCorrectedParsing(question));
@@ -66,10 +64,21 @@ public class Scasp_question {
         }
     }
 
+
+    //TODO POS Correction
     private static Question filteredCorrectedParsing(Question question) {
         //POS correction
         question.wordList.stream().forEach(w -> {
             if(w.getLemma().equalsIgnoreCase("metal") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
+            else if(w.getLemma().equalsIgnoreCase("rubber") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
+            else if(w.getLemma().equalsIgnoreCase("matte") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
+            else if(w.getLemma().equalsIgnoreCase("cyan") && w.getPOSTag().equalsIgnoreCase("nn")){
                 w.setPOSTag("JJ");
             }
         });

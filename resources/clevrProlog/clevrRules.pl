@@ -104,8 +104,10 @@ larger_equal(Id1,Id2) :- property(Id1,size,S1),property(Id2,size,S2), size_order
 smaller_equal(Id1,Id2) :- property(Id1,size,S1), property(Id2,size,S2), size_order(L), indexOf(L,S1,X1), indexOf(L,S2,X2), X1 =< X2.
 
 left_compare(Id1,Id2) :- property(Id1,centerX,X1),property(Id2,centerX,X2),X1 < X2.
+right_compare(Id1,Id2) :- property(Id1,centerX,X1),property(Id2,centerX,X2),X1 > X2.
 
 bottom_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 < Y2.
+front_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 > Y2.
 
 %----Find Order----------
 order_by_size(L) :- get_all_id(L1), mergesort(L1,L,size).
@@ -122,13 +124,10 @@ order_bottom_to_top(L) :- get_all_id(L1), mergesort(L1,L,y_axis).
 
 get_properties([],[]).
 get_properties([X|T1],[[Y,X]|T2]) :- is_property(X,Y),get_properties(T1,T2).
-get_properties([X|T1],T2) :- not(is_property(X,Y)),get_properties(T1,T2).
+get_properties([X|T1],[[Y,Z]|T2]) :- is_property(Z,Y), similar(Z,X),get_properties(T1,T2).
+get_properties([X|T1],T2) :- not(is_property(X,Y)),not(similar(_,X)),get_properties(T1,T2).
 
 %---shape checking------
- 
-%shape(X) :- is_property(X,shape).
-%shape(X) :- is_property(Y,shape), similar(X,Y).
-
 check_shape(X,X) :- is_property(X,shape).
 check_shape(X,Y) :- is_property(Y,shape),similar(X,Y).
 %--------
@@ -145,4 +144,26 @@ list_subtract([],_,[]).
 list_subtract([H|T1],L,[H|T2]) :- nonmember(H,L), list_subtract(T1,L,T2).
 list_subtract([H|T1],L,T2) :- member(H,L), list_subtract(T1,L,T2).
 
+
+%-------Get List After/Before,left/right Position-----------
+get_behind_list(Id,L) :- get_all_id(L1),sub_list_behind(Id,L1,L).
+get_front_list(Id,L) :- get_all_id(L1),sub_list_front(Id,L1,L).
+get_left_list(Id,L) :- get_all_id(L1),sub_list_left(Id,L1,L).
+get_right_list(Id,L) :- get_all_id(L1),sub_list_right(Id,L1,L).
+
+sub_list_behind(_,[],[]).
+sub_list_behind(Id,[H|T1],[H|T]) :- bottom_compare(Id,H), sub_list_behind(Id,T1,T).
+sub_list_behind(Id,[H|T1],T) :- not(bottom_compare(Id,H)), sub_list_behind(Id,T1,T).
+
+sub_list_front(_,[],[]).
+sub_list_front(Id,[H|T1],[H|T]) :- front_compare(Id,H), sub_list_front(Id,T1,T).
+sub_list_front(Id,[H|T1],T) :- not(front_compare(Id,H)), sub_list_front(Id,T1,T).
+
+sub_list_right(_,[],[]).
+sub_list_right(Id,[H|T1],[H|T]) :- right_compare(Id,H), sub_list_right(Id,T1,T).
+sub_list_right(Id,[H|T1],T) :- not(right_compare(Id,H)), sub_list_right(Id,T1,T).
+
+sub_list_left(_,[],[]).
+sub_list_left(Id,[H|T1],[H|T]) :- left_compare(Id,H), sub_list_left(Id,T1,T).
+sub_list_left(Id,[H|T1],T) :- not(left_compare(Id,H)), sub_list_left(Id,T1,T).
 

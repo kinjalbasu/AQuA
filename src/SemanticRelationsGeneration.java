@@ -84,10 +84,22 @@ public class SemanticRelationsGeneration {
             String gov = indexLemmaMap.get(dependency.gov().index());
             String dep = indexLemmaMap.get(dependency.dep().index());
 
+            //TODO Dependency Corrections
             if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("metal")){
                 relation = "amod";
             }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("rubber")){
+                relation = "amod";
+            }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("matte")){
+                relation = "amod";
+            }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("cyan")){
+                relation = "amod";
+            }
 
+
+            //----------------------
             String s = null;
             if(!StringUtils.isNumeric(gov) && !StringUtils.isNumeric(dep)) {
                 s = "_" + relation + "(" + gov + "_" + dependency.gov().index() + "," + dep + "_" + dependency.dep().index() + ").";

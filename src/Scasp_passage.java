@@ -14,7 +14,6 @@ public class Scasp_passage {
         }
     }
     public static void printPassage(String content, BufferedWriter bw1, BufferedWriter bw2) throws IOException {
-        // TODO code application logic here
         // String content = "The American Broadcasting Company (ABC), stylized in the network's logo as abc since 1957, is " +
         //"an American commercial broadcast television network that is owned by the Disney_ABC_Television_Group, a subsidiary " +
         //"of Disney_Media_Networks division of The_Walt_Disney_Company. The ABC network is part of The_Big_Three television " +

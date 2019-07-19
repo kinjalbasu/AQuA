@@ -122,9 +122,9 @@ public class Parent {
 
 
         do {
-            //System.out.print("Question = ");
-            //String question = scan.nextLine();
-            String question = "Is there any other thing that is the same color as the metal cube?";
+            System.out.print("Question = ");
+            String question = scan.nextLine();
+            //String question = "Is the tiny yellow object made of the same material as the large purple cylinder ?";
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write(":- include('clevrKnowledge.pl').\n" +

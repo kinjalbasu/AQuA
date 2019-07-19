@@ -2,8 +2,8 @@
 :- include('clevrRules.pl').
 :- include('clevrSemanticRules.pl').
 :- include('clevrCommonFacts.pl').
-find_ans(Q) :- question(Q),find_all_filters(cube, 14, L1),list_object(L1, Ids1),get_att_val(Ids1, color, Val),find_all_filters(thing, 5, L2),list_object([[color,Val]|L2], Ids2),list_subtract(Ids2, Ids1, Ids),list_length(Ids, C),quantification(N, thing_5),gte(C, N).
-question('is there any other thing that is the same color as the metal cube ?').
-question_answer('is there any other thing that is the same color as the metal cube ?', true) :- find_ans('is there any other thing that is the same color as the metal cube ?').
-question_answer('is there any other thing that is the same color as the metal cube ?', false) :- not find_ans('is there any other thing that is the same color as the metal cube ?').
+find_ans(Q) :- question(Q),find_all_filters(thing, 7, L),list_object(L, Ids),list_length(Ids, C),quantification(N, thing_7),gte(C, N).
+question('is there a big blue rubber thing ?').
+question_answer('is there a big blue rubber thing ?', true) :- find_ans('is there a big blue rubber thing ?').
+question_answer('is there a big blue rubber thing ?', false) :- not find_ans('is there a big blue rubber thing ?').
 query(Q, A) :- question(Q),question_answer(Q, A).
