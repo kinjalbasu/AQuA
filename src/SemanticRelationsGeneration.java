@@ -52,7 +52,8 @@ public class SemanticRelationsGeneration {
                 if(w.equalsIgnoreCase("anything") && word.getPOSTag().equalsIgnoreCase("nn")){
                     sementicRelations.add("quantification(1,"+w+"_"+word.getWordIndex()+").");
                 }
-                if(w.equalsIgnoreCase("thing") && sentence.wordList.get(word.getWordIndex() - 2).getLemma().equalsIgnoreCase("other")){
+                if(w.equalsIgnoreCase("thing")
+                        && sentence.wordList.get(word.getWordIndex() - 2).getLemma().equalsIgnoreCase("other")){
                     sementicRelations.add("quantification(1,"+w+"_"+word.getWordIndex()+").");
 
                 }
@@ -129,16 +130,17 @@ public class SemanticRelationsGeneration {
                 sementicRelations.add(getSynonymRule(gov, dep));
             }
 
-            if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an")){
-                sementicRelations.add(getQuantificationRule(dependency));
+            if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an|any")){
+                sementicRelations.add(getQuantificationRule(dependency,sentence.wordList));
             }
 
         }
 
     }
 
-    private static String getQuantificationRule(TypedDependency dependency) {
-        return "quantification(1,"+ dependency.gov().backingLabel().toString().replace("-","_") + ").";
+    private static String getQuantificationRule(TypedDependency dependency, List<Word> wordList) {
+       // return "quantification(1,"+ dependency.gov().backingLabel().toString().replace("-","_") + ").";
+        return "quantification(1,"+ wordList.get(dependency.gov().index()-1).getLemma() + "_" + dependency.gov().index() + ").";
     }
 
     public static List<String> getConcept(String w) {

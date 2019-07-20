@@ -122,9 +122,10 @@ public class Parent {
 
 
         do {
-            System.out.print("Question = ");
-            String question = scan.nextLine();
-            //String question = "Is the tiny yellow object made of the same material as the large purple cylinder ?";
+            //System.out.print("Question = ");
+            //String question = scan.nextLine();
+            String question = "Are there more large yellow matte things than purple objects ?";
+
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write(":- include('clevrKnowledge.pl').\n" +
@@ -175,10 +176,17 @@ public class Parent {
             }
             else{
                 //t = "get_all_id(Ids),filter_all([[shape,cube],[color,blue]],Ids,L1),filter_all([[material,nonmetal]],Ids,L2).";
-                q = new Query("query(Q,A).");
-                Map<String, Term>[] map = q.allSolutions();
-                System.out.println("Question : " + map[0].get("Q"));
-                System.out.println("Answer : " + map[0].get("A"));
+                try {
+                    q = new Query("query(Q,A).");
+                    Map<String, Term>[] map = q.allSolutions();
+                    System.out.println("Question : " + map[0].get("Q"));
+                    System.out.println("Answer : " + map[0].get("A"));
+                }
+                catch (Exception e){
+                    System.out.println("EXCEPTIONS OCCURED");
+                    e.printStackTrace();
+                    //continue;
+                }
             }
             //System.out.println("No Answer (Time Out)");
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");

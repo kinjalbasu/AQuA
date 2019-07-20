@@ -19,9 +19,10 @@ public class ClevrQuestionBoolean {
         }
         //Is there a cylinder of the same color as the rubber object?
         else if ((question.semanticRoot.getPOSTag().toLowerCase().matches("vbz") ||
-                question.semanticRoot.getPOSTag().toLowerCase().matches("vbp"))&&
+                question.semanticRoot.getPOSTag().toLowerCase().matches("vbp")) &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
-                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty()) {
+                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
+                !question.wordList.stream().filter(w -> w.getPOSTag().matches("JJR|RBR|JJ-JJR|JJ-RBR")).findFirst().isPresent()) {
             rules.addAll(getComplexExistentialRule(question));
         }
         //Is the brown thing the same size as the red matte cylinder?
@@ -53,11 +54,26 @@ public class ClevrQuestionBoolean {
                 question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma().equalsIgnoreCase("number")) {
             rules.addAll(getArithmaticRules(question));
         }
+        //Are there fewer cubes than shiny objects?
+        else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
+                question.wordList.stream().filter(w -> w.getPOSTag().matches("JJR|RBR|JJ-JJR|JJ-RBR")).findFirst().isPresent()) {
+            rules.addAll(getArithmaticRules(question));
+        }
+        //Are there more cubes than rubber objects?
+        else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("advmod", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("advmod").get(0).getLemma().equalsIgnoreCase("there") &&
+                question.wordList.stream().filter(w -> w.getPOSTag().matches("RBR|JJ-RBR")).findFirst().isPresent()) {
+            rules.addAll(getArithmaticRules(question));
+        }
         rules = ClevrQuestionCommonRules.modifyCommonQueryRules(rules, true);
         //return getCommonQueryRules(rules,true);
         rules.addAll(ClevrQuestionCommonRules.getCommonQueryRules(question, true));
         return rules;
     }
+
     private static List<Rule> getExistentialRule(Word word) {
         List<Rule> rules = new ArrayList<>();
         Literal head = null;
@@ -171,18 +187,16 @@ public class ClevrQuestionBoolean {
             depList.sort(Comparator.comparing(d -> d.gov().index()));
             depList.sort(Comparator.reverseOrder());
 
-            for (int i = 0; i <= depList.size(); i++ ) {
+            for (int i = 0; i <= depList.size(); i++) {
                 if (i == 0) {
                     TypedDependency d = depList.get(i);
-                    body.addAll(getTransitiveLiterals(d,i,false));
-                }
-                else if(i==depList.size()){
-                    TypedDependency d = depList.get(i-1);
-                    body.addAll(getTransitiveLiterals(d,i,true));
-                }
-                else{
-                    TypedDependency d = depList.get(i-1);
-                    body.addAll(getTransitiveLiterals(d,i,false));
+                    body.addAll(getTransitiveLiterals(d, i, false));
+                } else if (i == depList.size()) {
+                    TypedDependency d = depList.get(i - 1);
+                    body.addAll(getTransitiveLiterals(d, i, true));
+                } else {
+                    TypedDependency d = depList.get(i - 1);
+                    body.addAll(getTransitiveLiterals(d, i, false));
                 }
 
             }
@@ -200,13 +214,12 @@ public class ClevrQuestionBoolean {
             terms.add(new Literal(new Word("C", true)));
             terms.add(new Literal(new Word("N", true)));
             body.add(new Literal(new Word("gte", false), terms));
-            rules.add(new Rule(head,body,true));
+            rules.add(new Rule(head, body, true));
         }
 
         return rules;
 
     }
-
 
 
     private static List<Literal> getTransitiveLiterals(TypedDependency d, int i, boolean lastDependency) {
@@ -220,44 +233,40 @@ public class ClevrQuestionBoolean {
         List<Literal> body = new ArrayList<>();
 
         List<Literal> terms = new ArrayList<>();
-        if(i==0){
-            terms.add(new Literal(new Word("L"+((2*i)+1), true)));
+        if (i == 0) {
+            terms.add(new Literal(new Word("L" + ((2 * i) + 1), true)));
             body.add(new Literal(new Word("get_all_id", false), terms));
 
-        }
-        else if(relation.equalsIgnoreCase("behind")){
-            terms.add(new Literal(new Word("H"+(i-1), true)));
-            terms.add(new Literal(new Word("L"+((2*i)+1), true)));
+        } else if (relation.equalsIgnoreCase("behind")) {
+            terms.add(new Literal(new Word("H" + (i - 1), true)));
+            terms.add(new Literal(new Word("L" + ((2 * i) + 1), true)));
             body.add(new Literal(new Word("get_behind_list", false), terms));
-        }
-        else if(relation.equalsIgnoreCase("in_front_of")){
-            terms.add(new Literal(new Word("H"+(i-1), true)));
-            terms.add(new Literal(new Word("L"+((2*i)+1), true)));
+        } else if (relation.equalsIgnoreCase("in_front_of")) {
+            terms.add(new Literal(new Word("H" + (i - 1), true)));
+            terms.add(new Literal(new Word("L" + ((2 * i) + 1), true)));
             body.add(new Literal(new Word("get_front_list", false), terms));
         }
 
 
-        terms= new ArrayList<>();
-        if(i==0) {
+        terms = new ArrayList<>();
+        if (i == 0) {
             terms.add(new Literal(new Word(dep, false)));
             terms.add(new Literal(new Word(depIndex, false)));
-        }
-        else{
+        } else {
             terms.add(new Literal(new Word(gov, false)));
             terms.add(new Literal(new Word(govIndex, false)));
         }
-        terms.add(new Literal(new Word("L"+((2*i)+2), true)));
+        terms.add(new Literal(new Word("L" + ((2 * i) + 2), true)));
         body.add(new Literal(new Word("find_all_filters", false), terms));
 
         terms = new ArrayList<>();
 
-        terms.add(new Literal(new Word("L"+((2*i)+2), true)));
-        terms.add(new Literal(new Word("L"+((2*i)+1), true)));
-        if(lastDependency){
+        terms.add(new Literal(new Word("L" + ((2 * i) + 2), true)));
+        terms.add(new Literal(new Word("L" + ((2 * i) + 1), true)));
+        if (lastDependency) {
             terms.add(new Literal(new Word("Ids", true)));
-        }
-        else{
-            terms.add(new Literal(new Word("[H"+i+"|T"+i+"]", true)));
+        } else {
+            terms.add(new Literal(new Word("[H" + i + "|T" + i + "]", true)));
         }
         body.add(new Literal(new Word("filter_all", false), terms));
 
@@ -365,7 +374,7 @@ public class ClevrQuestionBoolean {
 
     private static List<Rule> getArithmaticRules(Question question) {
         List<Rule> rules = new ArrayList<>();
-        Optional<Word> comparatorWord = question.wordList.stream().filter(w -> w.getPOSTag().matches("JJR|JJ-JJR|JJ-RBR")).findFirst();
+        Optional<Word> comparatorWord = question.wordList.stream().filter(w -> w.getPOSTag().matches("JJR|RBR|JJ-JJR|JJ-RBR")).findFirst();
         if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-JJR") &&
                 comparatorWord.get().getLemma().matches("less|greater") &&
                 !comparatorWord.get().getRelationMap().getOrDefault("nmod:than", new ArrayList<>()).isEmpty()) {
@@ -380,8 +389,8 @@ public class ClevrQuestionBoolean {
             String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
                     .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
 
-            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get()));
-        } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-RBR")
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get().getLemma()));
+        } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("RBR|JJ-RBR")
                 && comparatorWord.get().getLemma().matches("less|greater") &&
                 !comparatorWord.get().getRelationMap().getOrDefault("nmod:than", new ArrayList<>()).isEmpty()) {
 
@@ -395,12 +404,34 @@ public class ClevrQuestionBoolean {
             String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
                     .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
 
-            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get()));
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get().getLemma()));
+
+        } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-JJR") &&
+                comparatorWord.get().getLemma().matches("fewer") &&
+                question.dependencies.stream()
+                        .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                                && d.reln().getSpecific().equalsIgnoreCase("than")).findFirst().isPresent()) {
+            Word o1 = question.semanticRoot.getRelationMap().get("nsubj").get(0);
+            String object1 = o1.getLemma();
+            String object1Index = Integer.toString(o1.getWordIndex());
+            String object2 = o1.getRelationMap().get("nmod:than").get(0).getLemma();
+            String object2Index = Integer.toString(o1.getRelationMap().get("nmod:than").get(0).getWordIndex());
+
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, "less"));
+        } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("RBR|JJ-RBR") &&
+                comparatorWord.get().getLemma().equalsIgnoreCase("more") &&
+                !question.semanticRoot.getRelationMap().get("advmod").get(0).getRelationMap().getOrDefault("dep", new ArrayList<>()).isEmpty()) {
+            Word o1 =question.semanticRoot.getRelationMap().get("advmod").get(0).getRelationMap().get("dep").get(0);
+            String object1 = o1.getLemma();
+            String object1Index = Integer.toString(o1.getWordIndex());
+            String object2 = o1.getRelationMap().get("nmod:than").get(0).getLemma();
+            String object2Index = Integer.toString(o1.getRelationMap().get("nmod:than").get(0).getWordIndex());
+            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, "greater"));
         }
         return rules;
     }
 
-    private static Rule getArithmaticRulesBody(String object1, String object1Index, String object2, String object2Index, Word word) {
+    private static Rule getArithmaticRulesBody(String object1, String object1Index, String object2, String object2Index, String comparatorWord) {
         Literal head = null;
         List<Literal> body = new ArrayList<>();
         List<Literal> terms = new ArrayList<>();
@@ -439,9 +470,9 @@ public class ClevrQuestionBoolean {
         terms = new ArrayList<>();
         terms.add(new Literal(new Word("C1", true)));
         terms.add(new Literal(new Word("C2", true)));
-        if (word.getLemma().equalsIgnoreCase("less")) {
+        if (comparatorWord.equalsIgnoreCase("less")) {
             body.add(new Literal(new Word("lt", false), terms));
-        } else if (word.getLemma().equalsIgnoreCase("greater")) {
+        } else if (comparatorWord.equalsIgnoreCase("greater")) {
             body.add(new Literal(new Word("gt", false), terms));
         }
         return new Rule(head, body, true);
