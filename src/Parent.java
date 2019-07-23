@@ -122,9 +122,9 @@ public class Parent {
 
 
         do {
-            System.out.print("Question = ");
-            String question = scan.nextLine();
-            //String question = "Are there any cubes in front of the small cube ?";
+            //System.out.print("Question = ");
+            //String question = scan.nextLine();
+            String question = "How many small blue metallic balls are there ?";
 
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);

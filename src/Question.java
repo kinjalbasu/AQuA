@@ -27,6 +27,9 @@ public class Question extends Sentence {
         if(questionType == QuestionType.TRUE_FALSE){
             return AnswerType.BOOLEAN;
         }
+        else if(questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH){
+            return AnswerType.QUANTITY;
+        }
         return AnswerType.UNKNOWN;
     }
 
@@ -34,6 +37,11 @@ public class Question extends Sentence {
         String w = questionWord.getWord().toLowerCase();
         if(w.matches("is|are")){
             return QuestionType.TRUE_FALSE;
+        }
+        else if(questionWord.getLemma().equalsIgnoreCase("how")
+                && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")){
+            String newWordString = questionWord.getLemma()+"_"+this.wordList.get(questionWord.getWordIndex()).getLemma();
+            return GetQuestionType(newWordString);
         }
         return QuestionType.UNKNOWN;
     }
@@ -43,6 +51,13 @@ public class Question extends Sentence {
         if(this.wordList.get(0).getWord().toLowerCase().matches("is|are")){
             questionWord = this.wordList.get(0);
         }
+        else if(this.wordList.get(0).getLemma().equalsIgnoreCase("how"))
+        {
+            //String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
+            //information.questionType = GetQuestionType(newWordString);
+            questionWord = this.wordList.get(0);
+        }
+
         return questionWord;
     }
 

@@ -12,7 +12,7 @@ public class ClevrQuestionBoolean {
         List<Word> nouns = question.wordList.stream().filter(w -> w.getPOSTag().toLowerCase().matches("nn|nnp|nns|nnps")).collect(Collectors.toList());
         //Map<String,List<String>> commonSenseConceptsMap = nouns.stream().collect(Collectors.toMap(n -> n.getWord(), n-> SemanticRelationsGeneration.getConcept(n.getWord())));
 
-        generateFacts(question, nouns);
+        ClevrQuestionCommonRules.generateFacts(question, nouns);
         //Is there a tiny cyan matte ball?
         if (nouns.size() == 1) {
             rules.addAll(getExistentialRule(nouns.get(0)));
@@ -561,81 +561,7 @@ public class ClevrQuestionBoolean {
         return r;
     }
 
-    private static void generateFacts(Question question, List<Word> nouns) {
-        SemanticRelationsGeneration.initializeLists();
-        SemanticRelationsGeneration.generateSemanticRelations(question);
-        List<String> factsList = new ArrayList<>();
-        factsList.addAll(SemanticRelationsGeneration.getPosFacts());
-        factsList.addAll(SemanticRelationsGeneration.getDependenciesFacts());
-        factsList.addAll(SemanticRelationsGeneration.getConceptualRelations());
-        factsList.addAll(SemanticRelationsGeneration.getSementicRelations());
-        String semanticPath = "resources/clevr/clevrSemanticRules.lp";
-        String rulesPath = "resources/Rules.lp";
-        try {
-            File semanticFile = new File(semanticPath);
-            FileWriter fw = new FileWriter(semanticFile);
-            BufferedWriter bw = new BufferedWriter(fw);
-            for (String s :
-                    factsList) {
-                bw.write(s);
-                bw.newLine();
-            }
-            bw.close();
 
-            Runtime rt = Runtime.getRuntime();
-            Process proc = rt.exec("gringo " + semanticPath + " " + rulesPath + " -t");
-            BufferedReader stdInput = new BufferedReader(new
-                    InputStreamReader(proc.getInputStream()));
-            BufferedReader stdError = new BufferedReader(new
-                    InputStreamReader(proc.getErrorStream()));
-            BufferedWriter rel_bw = new BufferedWriter(new FileWriter(semanticPath, true));
-            rel_bw.newLine();
-            String s = null;
-            List<String> values = new ArrayList<>();
-            while ((s = stdInput.readLine()) != null) {
-                if (s.startsWith("#") || s.startsWith("_")) {
-                    continue;
-                }
-                if (s.startsWith("value")) {
-                    values.add(s);
-                }
-                rel_bw.write(s);
-                rel_bw.newLine();
-            }
-            values = getValues(values, nouns);
-
-            for (String val :
-                    values) {
-                rel_bw.write(val);
-                rel_bw.newLine();
-            }
-            //add values.
-            rel_bw.close();
-            String err = null;
-            while ((err = stdError.readLine()) != null) {
-                //  System.out.println(err);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static List<String> getValues(List<String> values, List<Word> nouns) {
-        List<String> valuesFindAll = new ArrayList<>();
-        Map<String, List<String>> valueMap = new HashMap<>();
-        for (Word n : nouns) {
-            valueMap.put(n.getLemma() + "_" + n.getWordIndex(), new ArrayList<>());
-        }
-        values.stream().forEach(s -> {
-            String[] keyVal = s.substring(s.indexOf("(") + 1, s.indexOf(")")).split(",");
-            valueMap.get(keyVal[1]).add(keyVal[0].split("_")[0]);
-        });
-        valueMap.forEach((k, v) -> {
-            String val = "values(" + k.split("_")[0] + "," + k.split("_")[1] + ",[" + v.stream().collect(Collectors.joining(",")) + "]).";
-            valuesFindAll.add(val);
-        });
-        return valuesFindAll;
-    }
 
 
     private static Rule getComplexExistentialPredicates(String exitentialItem, String existentialIndex, String comparator,

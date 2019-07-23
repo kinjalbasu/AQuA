@@ -12,6 +12,9 @@ public class ClevrQueryGeneration {
         if (question.information.answerType == AnswerType.BOOLEAN || question.information.questionType == QuestionType.TRUE_FALSE) {
             rules = ClevrQuestionBoolean.getBooleanRules(question);
         }
+        else if (question.information.answerType == AnswerType.QUANTITY){
+            rules = ClevrQuestionQuantity.getQuantityRules(question);
+        }
         return rules;
     }
 
