@@ -120,12 +120,22 @@ public class Parent {
         String questionFlag = "y";
         // ExecutorService executor = Executors.newCachedThreadPool();
 
+        long startTime = System.currentTimeMillis();
 
+
+        Scasp_question.TestSetupParser();
+        Scasp_question.InitializeTest();
+
+        long endTime = System.currentTimeMillis();
+        double timeElapsed = ((double)endTime - (double) startTime)/1000;
+        System.out.println("CoreNLP Initialization Time : " + timeElapsed + " Sec");
         do {
+
             //System.out.print("Question = ");
             //String question = scan.nextLine();
-            String question = "How many small blue metallic balls are there ?";
 
+            String question = "How many cubes are brown things or tiny metal objects?";
+            startTime = System.currentTimeMillis();
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write(":- include('clevrKnowledge.pl').\n" +
@@ -188,6 +198,10 @@ public class Parent {
 
                 }
             }
+            endTime = System.currentTimeMillis();
+            timeElapsed = ((double)endTime - (double) startTime)/1000;
+
+            System.out.println("Execution Time : " + timeElapsed + " Sec");
             //System.out.println("No Answer (Time Out)");
             System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
             questionFlag = scan.nextLine();

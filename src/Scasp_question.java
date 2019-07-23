@@ -27,8 +27,8 @@ public class Scasp_question {
 
     public static void printQuestion(String content, BufferedWriter bw) throws IOException {
 
-        TestSetupParser();
-        InitializeTest();
+        //TestSetupParser();
+        //InitializeTest();
         //String content = "Since what year did ABC stylize abc's logo, as abc ?";
         Question question = new Question(content);
         List<Rule> rules = ClevrQueryGeneration.getClevrQuery(filteredCorrectedParsing(question));
@@ -80,6 +80,10 @@ public class Scasp_question {
             }
             else if(w.getLemma().equalsIgnoreCase("cyan") && w.getPOSTag().equalsIgnoreCase("nn")){
                 w.setPOSTag("JJ");
+            }
+            else if(w.getWord().equalsIgnoreCase("left") && w.getPOSTag().equalsIgnoreCase("vbn")){
+                w.setPOSTag("JJ");
+                w.setLemma("left");
             }
         });
 

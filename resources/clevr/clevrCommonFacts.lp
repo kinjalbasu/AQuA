@@ -9,6 +9,8 @@ is_property(yellow,color).
 is_property(blue,color).
 is_property(cyan,color).
 is_property(gray,color).
+is_property(brown,color).
+
 
 is_property(cube,shape).
 is_property(cylinder,shape).

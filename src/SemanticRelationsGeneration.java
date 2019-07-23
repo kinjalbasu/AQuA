@@ -98,6 +98,12 @@ public class SemanticRelationsGeneration {
             else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("cyan")){
                 relation = "amod";
             }
+            else if(relation.equalsIgnoreCase("nsubjpass") && gov.equalsIgnoreCase("left")){
+                relation = "nsubj";
+            }
+            else if(relation.equalsIgnoreCase("auxpass") && gov.equalsIgnoreCase("left")){
+                relation = "cop";
+            }
 
 
             //----------------------
