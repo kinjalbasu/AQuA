@@ -1,3 +1,5 @@
+import edu.stanford.nlp.trees.TypedDependency;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +15,14 @@ public class ClevrQuestionQuantity {
         if (!question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
                 !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty()) {
             rules.addAll(getSingleObjectCount(question));
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                ((!question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty())
+                        ||
+                        (question.semanticRoot.getRelationMap().get("nsubj").size() == 2 &&
+                                question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> w.getPOSTag().equalsIgnoreCase("jj")).findFirst().isPresent()
+                        ))) {
+            rules.addAll(getComplexSingleObjectCount(question));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("JJ") &&
                 question.semanticRoot.getLemma().matches("left|right")) {
             rules.addAll(getReferencedRule(question));
@@ -25,12 +35,64 @@ public class ClevrQuestionQuantity {
                         && d.reln().getSpecific().equalsIgnoreCase("or")
                         && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma())).findFirst().isPresent()) {
             rules.addAll(getOrRules(question));
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("conj:or")).findFirst().isPresent()) {
+            rules.addAll(getOrRules(question));
+
         }
         rules = ClevrQuestionCommonRules.modifyCommonQueryRules(rules, false);
 
         rules.addAll(ClevrQuestionCommonRules.getCommonQueryRules(question, false));
 
         return rules;
+    }
+
+    private static List<Rule> getComplexSingleObjectCount(Question question) {
+        List<Rule> rules = new ArrayList<>();
+
+        if (!question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty()) {
+            String countingObject = question.semanticRoot.getRelationMap().get("dobj").get(0).getLemma();
+            String countingObjectIndex = Integer.toString(question.semanticRoot.getRelationMap().get("dobj").get(0).getWordIndex());
+            String filter = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
+            rules.add(getComplexSingleObjectLiterals(countingObjectIndex, countingObject, filter));
+        } else if (question.semanticRoot.getRelationMap().get("nsubj").size() == 2) {
+            Word countingObject = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> w.getPOSTag().matches("NNS|NN")).findFirst().get();
+            String countingObjectIndex = Integer.toString(countingObject.getWordIndex());
+            String filter = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> w.getPOSTag().matches("JJ")).findFirst().get().getLemma();
+            rules.add(getComplexSingleObjectLiterals(countingObjectIndex, countingObject.getLemma(), filter));
+        }
+
+
+        return rules;
+    }
+
+    private static Rule getComplexSingleObjectLiterals(String countingObjectIndex, String countingObject, String filter) {
+        Literal head = null;
+        List<Literal> body = new ArrayList<>();
+        List<Literal> terms = new ArrayList<>();
+        terms.add(new Literal(new Word(countingObject, false)));
+        terms.add(new Literal(new Word(countingObjectIndex, false)));
+        terms.add(new Literal(new Word("L1", true)));
+        body.add(new Literal(new Word("find_all_filters", false), terms));
+
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word("[" + filter + "]", false)));
+        terms.add(new Literal(new Word("[X]", true)));
+        body.add(new Literal(new Word("get_properties", false), terms));
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word("[X|L1]", true)));
+        terms.add(new Literal(new Word("Ids", true)));
+        body.add(new Literal(new Word("list_object", false), terms));
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word("Ids", true)));
+        terms.add(new Literal(new Word("A", true)));
+        body.add(new Literal(new Word("list_length", false), terms));
+
+        return new Rule(head, body, true);
     }
 
     private static List<Rule> getOrRules(Question question) {
@@ -48,6 +110,19 @@ public class ClevrQuestionQuantity {
             String parentObject = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
 
             rules.add(getOrPredicates(object1, object1Index, object2, object2Index, parentObject, parentObjectIndex));
+
+
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP")) {
+            TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("conj:or")).findFirst().get();
+            int object1Index = c.gov().index();
+            String object1 = question.wordList.get(object1Index - 1).getLemma();
+            int object2Index = c.dep().index();
+            String object2 = question.wordList.get(object2Index - 1).getLemma();
+            Word parentObject = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(d -> d.getWordIndex() != object1Index
+                    && d.getWordIndex() != object2Index).findFirst().get();
+
+
+            rules.add(getOrPredicates(object1, Integer.toString(object1Index), object2, Integer.toString(object2Index), parentObject.getLemma(), Integer.toString(parentObject.getWordIndex())));
         }
         return rules;
     }
