@@ -134,7 +134,7 @@ public class Parent {
             //System.out.print("Question = ");
             //String question = scan.nextLine();
 
-            String question = "How many yellow things are tiny metal objects or big cubes ?";
+            String question = "How many things are the same size as the cube?";
             startTime = System.currentTimeMillis();
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);

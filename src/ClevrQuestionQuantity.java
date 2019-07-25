@@ -40,6 +40,14 @@ public class ClevrQuestionQuantity {
                 question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("conj:or")).findFirst().isPresent()) {
             rules.addAll(getOrRules(question));
 
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("nn") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")) {
+            rules.addAll(getComparisonRules(question));
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("amod")).findFirst().isPresent() &&
+                question.dependencies.stream().filter(d -> d.dep().value().equalsIgnoreCase("same")).findFirst().isPresent()) {
+            rules.addAll(getComparisonRules(question));
         }
         rules = ClevrQuestionCommonRules.modifyCommonQueryRules(rules, false);
 
@@ -47,6 +55,112 @@ public class ClevrQuestionQuantity {
 
         return rules;
     }
+
+    private static List<Rule> getComparisonRules(Question question) {
+        List<Rule> rules = new ArrayList<>();
+        if (question.semanticRoot.getPOSTag().equalsIgnoreCase("nn")) {
+            String comparisonAttribute = question.semanticRoot.getLemma();
+            String countingObjectIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
+            String countingObject = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
+            TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(comparisonAttribute)).findFirst().orElse(null);
+            String comparatorObjectIndex = c != null ? Integer.toString(question.wordList.get(c.dep().index() - 1).getWordIndex()) : null;
+            String comparatorObject = c != null ? question.wordList.get(c.dep().index() - 1).getLemma() : null;
+
+            if (comparatorObject != null) {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, comparatorObjectIndex,
+                        comparatorObject, comparisonAttribute,false));
+            }
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                        && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().isPresent() &&
+                question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                        && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")).findFirst().isPresent() &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().isPresent()) {
+
+
+            String comparisonAttribute = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                    && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")).findFirst().get().getLemma();
+            Word o = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                    && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().get();
+            String countingObjectIndex = Integer.toString(o.getWordIndex());
+            String countingObject = o.getLemma();
+            int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
+            String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+            if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, true));
+            } else {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, false));
+            }
+
+
+        }
+        return rules;
+    }
+
+    private static Rule getComparisonRuleLiterals(String countingObjectIndex, String countingObject,
+                                                  String comparatorObjectIndex, String comparatorObject, String comparisonAttribute, boolean isOtherExist) {
+        Literal head = null;
+        List<Literal> body = new ArrayList<>();
+
+        List<Literal> terms = new ArrayList<>();
+        terms.add(new Literal(new Word(comparatorObject, false)));
+        terms.add(new Literal(new Word(comparatorObjectIndex, false)));
+        terms.add(new Literal(new Word("L1", true)));
+        body.add(new Literal(new Word("find_all_filters", false), terms));
+
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word("L1", true)));
+        terms.add(new Literal(new Word("Ids1", true)));
+        body.add(new Literal(new Word("list_object", false), terms));
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word("Ids1", true)));
+        terms.add(new Literal(new Word(comparisonAttribute, false)));
+        terms.add(new Literal(new Word("Val", true)));
+        body.add(new Literal(new Word("get_att_val", false), terms));
+
+        terms = new ArrayList<>();
+        terms.add(new Literal(new Word(countingObject, false)));
+        terms.add(new Literal(new Word(countingObjectIndex, false)));
+        terms.add(new Literal(new Word("L2", true)));
+        body.add(new Literal(new Word("find_all_filters", false), terms));
+
+        terms = new ArrayList<>();
+        StringBuilder sbLiteral = new StringBuilder();
+        sbLiteral.append("[[").append(comparisonAttribute).append(",Val]|L2]");
+        //String literal = "[["+ comparisonAttribute + ",Val]|L2]";
+        String literal = sbLiteral.toString();
+        terms.add(new Literal(new Word(literal, true)));
+        terms.add(new Literal(new Word("Ids2", true)));
+        body.add(new Literal(new Word("list_object", false), terms));
+
+        if (isOtherExist) {
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("Ids2", true)));
+            terms.add(new Literal(new Word("Ids1", true)));
+            terms.add(new Literal(new Word("Ids", true)));
+            body.add(new Literal(new Word("list_subtract", false), terms));
+
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("Ids", true)));
+            terms.add(new Literal(new Word("A", true)));
+            body.add(new Literal(new Word("list_length", false), terms));
+        }
+        else{
+            terms = new ArrayList<>();
+            terms.add(new Literal(new Word("Ids2", true)));
+            terms.add(new Literal(new Word("A", true)));
+            body.add(new Literal(new Word("list_length", false), terms));
+        }
+        return new Rule(head, body, true);
+
+    }
+
 
     private static List<Rule> getComplexSingleObjectCount(Question question) {
         List<Rule> rules = new ArrayList<>();
