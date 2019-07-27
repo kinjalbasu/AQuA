@@ -13,9 +13,19 @@ public class ClevrQuestionQuantity {
         ClevrQuestionCommonRules.generateFacts(question, nouns);
 
         if (!question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
-                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty()) {
+                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).isEmpty()) {
             rules.addAll(getSingleObjectCount(question));
-        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP") &&
+        }
+        //How many other objects are there of the same size as the yellow metallic block ?
+        else if (!question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).isEmpty() &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().isPresent()) {
+            rules.addAll(getComparisonRules(question));
+        }
+
+   /*     else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP") && question.semanticRoot.getLemma().equalsIgnoreCase("be") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
                 ((!question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty())
                         ||
@@ -23,7 +33,9 @@ public class ClevrQuestionQuantity {
                                 question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> w.getPOSTag().equalsIgnoreCase("jj")).findFirst().isPresent()
                         ))) {
             rules.addAll(getComplexSingleObjectCount(question));
-        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("JJ") &&
+        } */
+
+        else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("JJ") &&
                 question.semanticRoot.getLemma().matches("left|right")) {
             rules.addAll(getReferencedRule(question));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
@@ -69,7 +81,7 @@ public class ClevrQuestionQuantity {
 
             if (comparatorObject != null) {
                 rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, comparatorObjectIndex,
-                        comparatorObject, comparisonAttribute,false));
+                        comparatorObject, comparisonAttribute, false));
             }
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
@@ -95,11 +107,73 @@ public class ClevrQuestionQuantity {
                 rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
                         comparatorObject, comparisonAttribute, false));
             }
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                        && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().isPresent() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().get("dobj").get(0).getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("dobj").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same") &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().isPresent()) {
+            Word o = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                    && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().get();
 
+            String countingObjectIndex = Integer.toString(o.getWordIndex());
+            String countingObject = o.getLemma();
+            int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
+            String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+            String comparisonAttribute = question.semanticRoot.getRelationMap().get("dobj").get(0).getLemma();
+            if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, true));
+            } else {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, false));
+            }
 
         }
+        else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nmod:of",new ArrayList<>()).isEmpty()){
+            Word o = question.semanticRoot.getRelationMap().get("nsubj").get(0);
+            String countingObjectIndex = Integer.toString(o.getWordIndex());
+            String countingObject = o.getLemma();
+            String comparisonAttribute = question.semanticRoot.getRelationMap().get("nmod:of").get(0).getLemma();
+            int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
+            String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+            if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, true));
+            } else {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, false));
+            }
+        }
+        else if(question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("dobj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                        && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().isPresent() &&
+                question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                        && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")).findFirst().isPresent() &&
+                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().isPresent()){
+            String comparisonAttribute = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                    && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")).findFirst().get().getLemma();
+            Word o = question.semanticRoot.getRelationMap().get("dobj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
+                    && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().get();
+            String countingObjectIndex = Integer.toString(o.getWordIndex());
+            String countingObject = o.getLemma();
+            int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
+            String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+            if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, true));
+            } else {
+                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                        comparatorObject, comparisonAttribute, false));
+            }
+        }
         return rules;
-    }
+}
 
     private static Rule getComparisonRuleLiterals(String countingObjectIndex, String countingObject,
                                                   String comparatorObjectIndex, String comparatorObject, String comparisonAttribute, boolean isOtherExist) {
@@ -150,8 +224,7 @@ public class ClevrQuestionQuantity {
             terms.add(new Literal(new Word("Ids", true)));
             terms.add(new Literal(new Word("A", true)));
             body.add(new Literal(new Word("list_length", false), terms));
-        }
-        else{
+        } else {
             terms = new ArrayList<>();
             terms.add(new Literal(new Word("Ids2", true)));
             terms.add(new Literal(new Word("A", true)));
@@ -176,8 +249,6 @@ public class ClevrQuestionQuantity {
             String filter = question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> w.getPOSTag().matches("JJ")).findFirst().get().getLemma();
             rules.add(getComplexSingleObjectLiterals(countingObjectIndex, countingObject.getLemma(), filter));
         }
-
-
         return rules;
     }
 
