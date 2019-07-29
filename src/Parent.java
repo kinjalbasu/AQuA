@@ -131,10 +131,11 @@ public class Parent {
         System.out.println("CoreNLP Initialization Time : " + timeElapsed + " Sec");
         do {
 
-            System.out.print("Question = ");
-            String question = scan.nextLine();
+            //System.out.print("Question = ");
 
-            //String question = "How many big purple matte things have the same shape as the large yellow object?";
+            //String question = scan.nextLine();
+
+            String question = "What number of things are the same color as the cube?";
             //String question = "How many small rubber objects are there?";
             startTime = System.currentTimeMillis();
             FileWriter fw3 = new FileWriter(question_output);

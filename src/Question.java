@@ -24,62 +24,62 @@ public class Question extends Sentence {
     }
 
     private AnswerType getAnswerTypeClevr(QuestionType questionType) {
-        if(questionType == QuestionType.TRUE_FALSE){
+        if (questionType == QuestionType.TRUE_FALSE) {
             return AnswerType.BOOLEAN;
-        }
-        else if(questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH){
+        } else if (questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH) {
             return AnswerType.QUANTITY;
+        } else if (questionType == QuestionType.WHAT
+                && this.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("det")
+                && d.gov().value().equalsIgnoreCase("number")).findFirst().isPresent()) {
+            return AnswerType.QUANTITY;
+        } else if (questionType == QuestionType.WHAT) {
+            return AnswerType.VALUE;
         }
+
         return AnswerType.UNKNOWN;
     }
 
     private QuestionType getQuestionTypeClevr(Word questionWord) {
         String w = questionWord.getWord().toLowerCase();
-        if(w.matches("is|are")){
+        if (w.matches("is|are")) {
             return QuestionType.TRUE_FALSE;
-        }
-        else if(questionWord.getLemma().equalsIgnoreCase("how")
-                && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")){
-            String newWordString = questionWord.getLemma()+"_"+this.wordList.get(questionWord.getWordIndex()).getLemma();
+        } else if (questionWord.getLemma().equalsIgnoreCase("how")
+                && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")) {
+            String newWordString = questionWord.getLemma() + "_" + this.wordList.get(questionWord.getWordIndex()).getLemma();
             return GetQuestionType(newWordString);
+        } else if (w.toLowerCase().equalsIgnoreCase("what")) {
+            return QuestionType.WHAT;
         }
         return QuestionType.UNKNOWN;
     }
 
     private Word getQuestionWordClevr() {
         Word questionWord = null;
-        if(this.wordList.get(0).getWord().toLowerCase().matches("is|are")){
+        if (this.wordList.get(0).getWord().toLowerCase().matches("is|are")) {
+            questionWord = this.wordList.get(0);
+        } else if (this.wordList.get(0).getLemma().equalsIgnoreCase("how")) {
+            questionWord = this.wordList.get(0);
+        } else if (this.wordList.get(0).getLemma().equalsIgnoreCase("what")) {
             questionWord = this.wordList.get(0);
         }
-        else if(this.wordList.get(0).getLemma().equalsIgnoreCase("how"))
-        {
-            //String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
-            //information.questionType = GetQuestionType(newWordString);
-            questionWord = this.wordList.get(0);
-        }
-
         return questionWord;
     }
 
     private QuestionInformation ExtractInformation() {
         QuestionInformation information = new QuestionInformation();
         Word questionWord = null;
-        for(Word word : this.wordList){
-            if(word.IsQuestionWord()){
-                if(word.getWord().equalsIgnoreCase("how")
-                        && this.wordList.get(word.getWordIndex()).getWord().matches("many|much"))
-                {
-                    String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
+        for (Word word : this.wordList) {
+            if (word.IsQuestionWord()) {
+                if (word.getWord().equalsIgnoreCase("how")
+                        && this.wordList.get(word.getWordIndex()).getWord().matches("many|much")) {
+                    String newWordString = word.getWord() + "_" + this.wordList.get(word.getWordIndex()).getWord();
                     information.questionType = GetQuestionType(newWordString);
                     questionWord = word;
-                }
-                else if(word.getWord().toLowerCase().matches("is|are"))
-                {
-                    String newWordString = word.getWord()+"_"+this.wordList.get(word.getWordIndex()).getWord();
+                } else if (word.getWord().toLowerCase().matches("is|are")) {
+                    String newWordString = word.getWord() + "_" + this.wordList.get(word.getWordIndex()).getWord();
                     information.questionType = GetQuestionType(newWordString);
                     questionWord = word;
-                }
-                else {
+                } else {
                     questionWord = word;
                     information.questionType = GetQuestionType(word.getWord());
                 }
@@ -95,10 +95,10 @@ public class Question extends Sentence {
 
         StringBuilder builder = new StringBuilder();
         builder.append("\n\nQuestion Information : \n");
-        String value = information.questionWord == null ? "null":information.questionWord.toString();
+        String value = information.questionWord == null ? "null" : information.questionWord.toString();
         builder.append("Question Word : " + value + "\n");
         builder.append("Question Type : " + information.questionType.toString() + "\n");
-        value = information.answerKind == null ? "null":information.answerKind.toString();
+        value = information.answerKind == null ? "null" : information.answerKind.toString();
         builder.append("Answer Word : " + value + "\n");
         builder.append("Answer Type : " + information.answerType.toString() + "\n");
         //System.out.println(builder.toString());
@@ -106,14 +106,14 @@ public class Question extends Sentence {
     }
 
     private AnswerType GetAnswerType(Word answerKind, QuestionType questionType) {
-        if(questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH){
-            return  AnswerType.QUANTITY;
+        if (questionType == QuestionType.HOW_MANY || questionType == QuestionType.HOW_MUCH) {
+            return AnswerType.QUANTITY;
         }
-        if(questionType == QuestionType.WHEN){
+        if (questionType == QuestionType.WHEN) {
             return AnswerType.TIME;
         }
-        if(questionType == QuestionType.WHAT) {
-            if(answerKind == null) return AnswerType.UNKNOWN;
+        if (questionType == QuestionType.WHAT) {
+            if (answerKind == null) return AnswerType.UNKNOWN;
             switch (answerKind.getLemma().toLowerCase()) {
                 case "year":
                     return AnswerType.YEAR;
@@ -137,10 +137,10 @@ public class Question extends Sentence {
     }
 
     private Word GetAnswerKind(Word questionWord) {
-        for(Word word : wordList){
+        for (Word word : wordList) {
             List<Word> determiners = word.GetDeterminers();
-            for(Word determiner : determiners){
-                if(determiner == questionWord){
+            for (Word determiner : determiners) {
+                if (determiner == questionWord) {
                     return word;
                 }
             }
@@ -150,13 +150,19 @@ public class Question extends Sentence {
     }
 
     private QuestionType GetQuestionType(String questionWord) {
-        switch(questionWord.toLowerCase()){
-            case "what": return QuestionType.WHAT;
-            case "where": return QuestionType.WHERE;
-            case "who": return QuestionType.WHO;
-            case "when": return QuestionType.WHEN;
-            case "how_many": return QuestionType.HOW_MANY;
-            case "how_much": return QuestionType.HOW_MUCH;
+        switch (questionWord.toLowerCase()) {
+            case "what":
+                return QuestionType.WHAT;
+            case "where":
+                return QuestionType.WHERE;
+            case "who":
+                return QuestionType.WHO;
+            case "when":
+                return QuestionType.WHEN;
+            case "how_many":
+                return QuestionType.HOW_MANY;
+            case "how_much":
+                return QuestionType.HOW_MUCH;
         }
 
         return QuestionType.UNKNOWN;
@@ -167,12 +173,11 @@ public class Question extends Sentence {
         List<Rule> constraints = this.preProcessRules;
         List<Rule> eventQueries = new ArrayList<>();
 
-        for(Word word : this.wordList){
-            if(word.getPOSTag().equalsIgnoreCase(",")) continue;
-            if(word.IsVerb()){
+        for (Word word : this.wordList) {
+            if (word.getPOSTag().equalsIgnoreCase(",")) continue;
+            if (word.IsVerb()) {
                 eventQueries.addAll(word.GenerateVerbQuestionRules(this.information));
-            }
-            else if(word.IsNoun() || word.IsAdjective()){
+            } else if (word.IsNoun() || word.IsAdjective()) {
                 constraints.addAll(word.GenerateNounConstraintRules(this.information));
             }
         }
@@ -180,31 +185,31 @@ public class Question extends Sentence {
         List<Rule> finalConstraints = Word.GenerateQuestionConstraintRules(this.information, this.dependencies, this.wordList);
         List<Rule> combinedConstraints = new ArrayList<>();
         Rule allConstraints = Rule.AggregateAllRules(constraints);
-        for(Rule constraint : finalConstraints) {
+        for (Rule constraint : finalConstraints) {
             Rule rule = Rule.ApplyConstraint(constraint, allConstraints);
             combinedConstraints.add(rule);
         }
 
-        if(finalConstraints.size() == 0) {
+        if (finalConstraints.size() == 0) {
             combinedConstraints.add(allConstraints);
         }
 
-        for(Rule eventQuery : eventQueries){
-            for(Rule combinedConstraint : combinedConstraints){
+        for (Rule eventQuery : eventQueries) {
+            for (Rule combinedConstraint : combinedConstraints) {
                 Rule rule = Rule.ApplyConstraint(eventQuery, combinedConstraint);
                 rules.add(rule);
             }
         }
 
         List<Rule> specialRules = GenerateSpecialRules(this.information);
-        for(Rule specialRule : specialRules){
-            for(Rule finalConstraint : finalConstraints){
+        for (Rule specialRule : specialRules) {
+            for (Rule finalConstraint : finalConstraints) {
                 Rule rule = Rule.ApplyConstraint(specialRule, finalConstraint);
                 rules.add(rule);
             }
         }
 
-        if(rules.size() != 0) return rules;
+        if (rules.size() != 0) return rules;
         rules.addAll(combinedConstraints);
 
         return rules;
@@ -214,16 +219,16 @@ public class Question extends Sentence {
         List<Rule> rules = new ArrayList<>();
 
         // Adding special rules for birth date and death date
-        if(information.questionType == QuestionType.WHEN){
+        if (information.questionType == QuestionType.WHEN) {
             Word verb = GetVerb(this.wordList, "bear");
-            if(verb != null) {
+            if (verb != null) {
                 /*Word complement = verb.HasClausalComplement(this.wordList, verb);
                 if(complement == null) return rules;
                 if(Word.IsVerbAndQuestionWordConnected(complement, information.questionWord)){
                     List<Rule> birthRules = Word.GenerateBirthRule(verb, information);
                     rules.addAll(birthRules);
                 }*/
-                if(Word.IsVerbAndQuestionWordConnected(verb, information.questionWord)){
+                if (Word.IsVerbAndQuestionWordConnected(verb, information.questionWord)) {
                     List<Rule> birthRules = Word.GenerateBirthRule(verb, information);
                     rules.addAll(birthRules);
                 }
@@ -232,10 +237,10 @@ public class Question extends Sentence {
             }
 
             verb = GetVerb(this.wordList, "die");
-            if(verb != null) {
+            if (verb != null) {
                 Word complement = verb.HasClausalComplement(this.wordList, verb);
-                if(complement == null) return rules;
-                if(Word.IsVerbAndQuestionWordConnected(complement, information.questionWord)){
+                if (complement == null) return rules;
+                if (Word.IsVerbAndQuestionWordConnected(complement, information.questionWord)) {
                     List<Rule> deathRules = Word.GenerateDeathRule(verb, information);
                     rules.addAll(deathRules);
                 }
@@ -248,8 +253,8 @@ public class Question extends Sentence {
     }
 
     private Word GetVerb(List<Word> wordList, String verbLemma) {
-        for(Word word : wordList){
-            if(word.getLemma().equalsIgnoreCase(verbLemma)){
+        for (Word word : wordList) {
+            if (word.getLemma().equalsIgnoreCase(verbLemma)) {
                 return word;
             }
         }
@@ -277,7 +282,7 @@ public class Question extends Sentence {
         Set<Rule> weakConstraintRules = FilterRules(unconstraintRules, LiteralType.BASE_CONSTRAINT);
         rulesSet.addAll(weakConstraintRules);
 
-        for(Rule rule : rulesSet){
+        for (Rule rule : rulesSet) {
             String sentence = this.sentenceString.replaceAll("'", "");
             rule.SetQuery(sentence, this.information);
         }
@@ -297,9 +302,9 @@ public class Question extends Sentence {
 
     private TreeSet<Rule> FilterRules(List<Rule> inputRules, LiteralType maxLiteralType) {
         TreeSet<Rule> rules = new TreeSet<>();
-        for(Rule inputRule : inputRules){
+        for (Rule inputRule : inputRules) {
             Rule rule = Rule.FilterRule(inputRule, maxLiteralType);
-            if(rule != null && rule.toString().length() != 0) rules.add(rule);
+            if (rule != null && rule.toString().length() != 0) rules.add(rule);
         }
 
         return rules;

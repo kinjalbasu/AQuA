@@ -11,5 +11,6 @@ public enum AnswerType {
     MONTH,
     UNKNOWN,
     QUANTITY,
-    BOOLEAN
+    BOOLEAN,
+    VALUE
 }
