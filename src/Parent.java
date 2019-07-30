@@ -135,7 +135,7 @@ public class Parent {
 
             //String question = scan.nextLine();
 
-            String question = "What number of things are the same color as the cube?";
+            String question = "What is the size of the ball?";
             //String question = "How many small rubber objects are there?";
             startTime = System.currentTimeMillis();
             FileWriter fw3 = new FileWriter(question_output);

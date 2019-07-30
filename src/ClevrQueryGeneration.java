@@ -15,6 +15,9 @@ public class ClevrQueryGeneration {
         else if (question.information.answerType == AnswerType.QUANTITY){
             rules = ClevrQuestionQuantity.getQuantityRules(question);
         }
+        else if (question.information.answerType == AnswerType.VALUE){
+            rules = ClevrQuestionValue.getValueRules(question);
+        }
         return rules;
     }
 

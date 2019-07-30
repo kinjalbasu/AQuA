@@ -149,7 +149,18 @@ public class ClevrQuestionQuantity {
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("expl", new ArrayList<>()).isEmpty() &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).isEmpty()) {
-            Word o = question.semanticRoot.getRelationMap().get("nsubj").get(0);
+
+            Word o = null;
+            if(question.information.questionType == QuestionType.WHAT && !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+            question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma().equalsIgnoreCase("number")){
+                TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:of")
+                        && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("number")).findFirst().get();
+                o = question.wordList.get(c.dep().index() - 1);
+            }
+            else{
+                o = question.semanticRoot.getRelationMap().get("nsubj").get(0);
+            }
+
             String countingObjectIndex = Integer.toString(o.getWordIndex());
             String countingObject = o.getLemma();
             String comparisonAttribute = question.semanticRoot.getRelationMap().get("nmod:of").get(0).getLemma();
