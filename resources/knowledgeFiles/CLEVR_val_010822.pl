@@ -1,0 +1,9 @@
+object(1,cylinder,yellow,rubber,small,295,107).
+object(2,cube,yellow,rubber,small,295,107).
+object(3,sphere,brown,metal,small,281,143).
+object(4,sphere,blue,rubber,small,172,120).
+object(5,cylinder,gray,metal,small,95,127).
+object(6,cube,gray,metal,small,198,97).
+object(7,sphere,yellow,rubber,large,347,167).
+object(8,cylinder,brown,metal,large,127,147).
+object(9,sphere,green,metal,large,241,78).

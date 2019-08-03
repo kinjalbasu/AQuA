@@ -1,6 +1,5 @@
-%object(id,shape,color,material,size, centerX, centerY)
-object(1,cylinder,gray,matte,large,10,300).
-object(2,cube,purple,matte,small,70,200).
-object(3,cube,brown,metal,big,30,260).
-object(4,sphere,blue,rubber,tiny,50,290).
-object(5,cylinder,yellow,metal,big,80,250).
+object(1,cylinder,cyan,metal,small,137,178).
+object(2,sphere,cyan,metal,small,270,85).
+object(3,sphere,blue,rubber,small,130,150).
+object(4,sphere,red,metal,large,238,107).
+get_all_id([1,2,3,4]).

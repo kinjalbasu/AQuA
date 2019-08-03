@@ -1,0 +1,15 @@
+CLEVR_val_006768.png,What number of blocks are there?,2 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_010006.png,What number of blocks are there?,2 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_010469.png,What number of blocks are there?,3 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_011546.png,What number of things are there?,7 ~~~~~~~~~  Calculated Answer : 6
+CLEVR_val_012813.png,What number of blocks are there?,3 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_014347.png,What number of things are there?,4 ~~~~~~~~~  Calculated Answer : 5
+CLEVR_val_014435.png,What number of blocks are there?,2 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_004322.png,What number of objects are there?,9 ~~~~~~~~~  Calculated Answer : 10
+CLEVR_val_011433.png,What number of objects are there?,3 ~~~~~~~~~  Calculated Answer : 4
+CLEVR_val_014270.png,What number of cylinders are there?,3 ~~~~~~~~~  Calculated Answer : 4
+CLEVR_val_005365.png,What number of big things are there?,5 ~~~~~~~~~  Calculated Answer : 6
+CLEVR_val_014223.png,What number of red blocks are there?,1 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_014773.png,What number of red blocks are there?,0 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED
+CLEVR_val_000225.png,What number of big objects are there?,5 ~~~~~~~~~  Calculated Answer : 6
+CLEVR_val_003744.png,What number of tiny blocks are there?,1 ~~~~~~~~~  Calculated Answer : EXCEPTIONS OCCURED

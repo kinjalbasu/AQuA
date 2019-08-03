@@ -44,7 +44,7 @@ lte(A,B) :- not gt(A,B).
 %get_all_id(L1,L3) :- count_id(L1,Id), add_tail(L1,Id,L2), get_all_id(L2,L3).
 %get_all_id(L1,L1).
 %get_all_id(L) :- get_all_id([],L).
-get_all_id([1,2,3,4,5]).
+%get_all_id([1,2,3,4,5]).
 
 %~~~SORTING~~~~~~~~
 list_length([],0).

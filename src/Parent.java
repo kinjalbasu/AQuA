@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.jpl7.Query;
 import org.jpl7.Term;
 
@@ -20,7 +21,7 @@ public class Parent {
     public static final String COMMON_FACTS_PATH = "resources/clevr/clevrCommonFacts.lp";
     public static final String RULE_PATH = "resources/clevr/clevrRules.lp";
     public static final String SEMANTIC_PATH = "resources/clevr/clevrSemanticRules.lp";
-   // public static final String RULE_PATH = "resources/Rules.lp";
+    // public static final String RULE_PATH = "resources/Rules.lp";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         RedwoodConfiguration.current().clear().apply();
@@ -117,7 +118,7 @@ public class Parent {
             //System.out.println(err);
         }*/
         //-------------For Demo-------------------
-        String questionFlag = "y";
+        //String questionFlag = "y";
         // ExecutorService executor = Executors.newCachedThreadPool();
 
         long startTime = System.currentTimeMillis();
@@ -127,17 +128,44 @@ public class Parent {
         Scasp_question.InitializeTest();
 
         long endTime = System.currentTimeMillis();
-        double timeElapsed = ((double)endTime - (double) startTime)/1000;
+        double timeElapsed = ((double) endTime - (double) startTime) / 1000;
         System.out.println("CoreNLP Initialization Time : " + timeElapsed + " Sec");
-        do {
+//        do {
 
-            //System.out.print("Question = ");
+        //System.out.print("Question = ");
 
-            //String question = scan.nextLine();
+        //String question = scan.nextLine();
+        String questionsFile = "resources/questions/questions.txt";
+        FileReader fr = new FileReader(new File(questionsFile));
+        BufferedReader br = new BufferedReader(fr);
 
-            String question = "What is the size of the ball?";
-            //String question = "How many small rubber objects are there?";
+
+        int totalQuestions = 0;
+        int correctQuestions = 0;
+
+        String incorrectQuestionPath = "resources/questions/incorrectQuestions.txt";
+
+        FileWriter fw = new FileWriter(new File(incorrectQuestionPath));
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.close();
+
+
+        String line = br.readLine();
+        //String line = "CLEVR_val_002501.png,How many blue things are the same size as the rubber block?,2";
+        long st = System.currentTimeMillis();
+        while (line != null) {
+            FileWriter fw1 = new FileWriter(new File(incorrectQuestionPath), true);
+            BufferedWriter bw1 = new BufferedWriter(fw1);
+
+
             startTime = System.currentTimeMillis();
+            totalQuestions++;
+            System.out.println(totalQuestions);
+            String[] values = line.split(",");
+            String image_file = values[0];
+            String question = values[1];
+            String answerActual = values[2];
+
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
             bw3.write(":- include('clevrKnowledge.pl').\n" +
@@ -146,69 +174,91 @@ public class Parent {
                     ":- include('clevrCommonFacts.pl').");
             bw3.newLine();
 
+
+            String answerPrediction = null;
+
+
+            generateKnowledgeFile(image_file, KNOWLEDGE_PATH);
             Scasp_question.printQuestion(question, bw3);
             bw3.close();
             generatePrologCompatibleCode();
-            //bw3.write("?- query(Q,A).");
-            //bw3.close();
-            /*Runtime rt = getRuntime();
-            System.out.println("Sasp invoked");
-            Process proc1 = rt.exec("sasp " + queryPath);
-
-
-            //Process proc1 = future.get(10, TimeUnit.SECONDS);
-
-
-            BufferedReader stdInput1 = new BufferedReader(new
-                    InputStreamReader(proc1.getInputStream()));
-
-            BufferedReader stdError1 = new BufferedReader(new
-                    InputStreamReader(proc1.getErrorStream()));
-            String s1 = null;
-            List<String> output = new ArrayList<>();
-
-
-            while ((s1 = stdInput1.readLine()) != null) {
-                output.add(s1);
-            }
-            if (2 < output.size()) {
-                System.out.println(output.get(2));
-            } else {
-                System.out.println("No Answer");
-            }
-            //System.out.println(output.get(3));
-            while ((s1 = stdError1.readLine()) != null) {
-                // System.out.println(s1);
-            }*/
-
             String t = "consult('resources/clevrProlog/clevrQuery.pl')";
             Query q = new Query(t);
-            if(!q.hasSolution()){
+            if (!q.hasSolution()) {
                 System.out.println("Fails");
-            }
-            else{
-                //t = "get_all_id(Ids),filter_all([[shape,cube],[color,blue]],Ids,L1),filter_all([[material,nonmetal]],Ids,L2).";
+            } else {
                 try {
                     q = new Query("query(Q,A).");
                     Map<String, Term>[] map = q.allSolutions();
-                    System.out.println("Question : " + map[0].get("Q"));
-                    System.out.println("Answer : " + map[0].get("A"));
-                }
-                catch (Exception e){
-                    System.out.println("EXCEPTIONS OCCURED");
+                    //System.out.println("Question : " + map[0].get("Q"));
+                    //System.out.println("Answer : " + map[0].get("A"));
+                    answerPrediction = map[0].get("A").toString();
+                } catch (Exception e) {
+                    //System.out.println("EXCEPTIONS OCCURED");
+                    answerPrediction = "EXCEPTIONS OCCURED";
                     e.printStackTrace();
-
                 }
             }
+
+            if (answerActual.toLowerCase().equalsIgnoreCase(answerPrediction.toLowerCase())) {
+                System.out.println("Correct");
+                correctQuestions++;
+
+            } else {
+                System.out.println("Incorrect");
+                bw1.write(line + " ~~~~~~~~~ " + " Calculated Answer : " + answerPrediction);
+                bw1.newLine();
+                System.out.println(line);
+            }
+
             endTime = System.currentTimeMillis();
-            timeElapsed = ((double)endTime - (double) startTime)/1000;
+            timeElapsed = ((double) endTime - (double) startTime) / 1000;
 
             System.out.println("Execution Time : " + timeElapsed + " Sec");
-            //System.out.println("No Answer (Time Out)");
-            System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
-            questionFlag = scan.nextLine();
+            line = br.readLine();
+            System.out.println();
+            bw1.close();
 
-        } while (!questionFlag.toLowerCase().equals("n"));
+
+       }
+        long et = System.currentTimeMillis();
+        double totalTime = ((double) et - (double) st) / 1000;
+        System.out.println("Total Process Time: " + totalTime + " Sec");
+
+        double accuracy = (double) correctQuestions / (double) totalQuestions;
+        System.out.println(accuracy);
+
+        //System.out.println("No Answer (Time Out)");
+        //        System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
+        //      questionFlag = scan.nextLine();
+
+        //      } while (!questionFlag.toLowerCase().equals("n"));
+    }
+
+    private static void generateKnowledgeFile(String image_file, String knowledgePath) throws IOException {
+        String root = "resources/knowledgeFiles/";
+        image_file = image_file.substring(0, image_file.indexOf(".")) + ".pl";
+        String filePath = root + image_file;
+        FileReader fr = new FileReader(new File(filePath));
+        BufferedReader br = new BufferedReader(fr);
+
+        FileWriter fw = new FileWriter(new File(knowledgePath));
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        List<String> idList = new ArrayList<>();
+
+        String s = br.readLine();
+        while (s != null) {
+            idList.add(s.substring(s.indexOf("(") + 1, s.indexOf(",")));
+            bw.write(s);
+            bw.newLine();
+            s = br.readLine();
+        }
+        String ids = String.join(",", idList);
+        String idsFact = "get_all_id([" + ids + "]).";
+        bw.write(idsFact);
+        bw.close();
+        br.close();
     }
 
     private static void generatePrologCompatibleCode() throws IOException {
@@ -217,30 +267,28 @@ public class Parent {
                 .map(f -> f.toString()).collect(Collectors.toList());
 
         String clevrPrologDirPath = "resources/clevrProlog";
-        for(String f : clevrFiles){
-            String newFileName = f.substring(f.lastIndexOf('\\')+1,f.indexOf('.')) + ".pl";
+        for (String f : clevrFiles) {
+            String newFileName = f.substring(f.lastIndexOf('\\') + 1, f.indexOf('.')) + ".pl";
             FileWriter fw = new FileWriter(new File(clevrPrologDirPath + File.separator + newFileName));
             BufferedWriter bw = new BufferedWriter(fw);
 
             FileReader fr = new FileReader(new File(f));
             BufferedReader br = new BufferedReader(fr);
             String s = br.readLine();
-            while(s != null){
-                if ( s.contains("not ")){
+            while (s != null) {
+                if (s.contains("not ")) {
                     String[] sARR = s.split("not ");
                     String s2 = sARR[0];
-                    for(int i = 1; i < sARR.length; i++){
-                        s2 += "not(" + sARR[i].replaceFirst("\\)","))");
+                    for (int i = 1; i < sARR.length; i++) {
+                        s2 += "not(" + sARR[i].replaceFirst("\\)", "))");
 
                     }
                     bw.write(s2);
                     bw.newLine();
-                }
-                else if (s.startsWith("_")){
-                    bw.write(s.replaceFirst("_",""));
+                } else if (s.startsWith("_")) {
+                    bw.write(s.replaceFirst("_", ""));
                     bw.newLine();
-                }
-                else {
+                } else {
                     bw.write(s);
                     bw.newLine();
                 }
@@ -256,7 +304,6 @@ public class Parent {
         Process proc1 = rt.exec("sasp " + queryPath);
         return proc1;
     }*/
-
 
 
 }

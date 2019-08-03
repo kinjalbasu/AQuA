@@ -128,46 +128,73 @@ public class ClevrQuestionBoolean {
             TypedDependency c1 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                             && d.reln().getSpecific().equalsIgnoreCase("as")
-                            && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(exitentialItem))
+                            && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(exitentialItem))
                     .findFirst().orElse(null);
 
             //String comparator = c1 != null ? c1.dep().value() : null;
-            String comparator = c1 != null ? question.wordList.get(c1.dep().index()-1).getLemma() : null;
+            String comparator = c1 != null ? question.wordList.get(c1.dep().index() - 1).getLemma() : null;
             String comparatorIndex = c1 != null ? Integer.toString(c1.dep().index()) : null;
             TypedDependency c2 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                             && d.reln().getSpecific().equalsIgnoreCase("of")
-                            && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(exitentialItem))
+                            && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(exitentialItem))
                     .findFirst().orElse(null);
 
             //String comparisonAttribute = c2 != null ? c2.dep().value() : null;
-            String comparisonAttribute = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
+            String comparisonAttribute = c2 != null ? question.wordList.get(c2.dep().index() - 1).getLemma() : null;
 
             rules.add(getComplexExistentialPredicates(exitentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
         } else if (!question.semanticRoot.getRelationMap().get("nsubj")
                 .get(0).getRelationMap().getOrDefault("acl:relcl", new ArrayList<>()).isEmpty()) {
 
-
-            String existentialItem = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
-            String existentialIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
+            Word existentialObject = question.semanticRoot.getRelationMap().get("nsubj").get(0);
+            String existentialItem = existentialObject.getLemma();
+            String existentialIndex = Integer.toString(existentialObject.getWordIndex());
             Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl:relcl").get(0);
-            if (w.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+            if (w.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty() &&
+                    w.getRelationMap().getOrDefault("advcl", new ArrayList<>()).isEmpty() &&
+                    !w.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty()) {
                 Word comparisonAttribute = w.getRelationMap().get("dobj").get(0);
-                String comparator = comparisonAttribute.getRelationMap().get("nmod:as").get(0).getLemma();
-                String comparatorIndex = Integer.toString(comparisonAttribute.getRelationMap().get("nmod:as").get(0).getWordIndex());
-                rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute.getLemma()));
-            } else if (!w.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty()) {
+
+                Word comparatorObject = null;
+                if (!comparisonAttribute.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+                    comparatorObject = comparisonAttribute.getRelationMap().get("nmod:as").get(0);
+                } else if (!existentialObject.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+                    comparatorObject = existentialObject.getRelationMap().get("nmod:as").get(0);
+                } else if (!comparisonAttribute.getRelationMap().getOrDefault("dep", new ArrayList<>()).isEmpty()) {
+                    comparatorObject = comparisonAttribute.getRelationMap().get("dep").get(0);
+                }
+                if (comparatorObject != null) {
+                    String comparator = comparatorObject.getLemma();
+                    String comparatorIndex = Integer.toString(comparatorObject.getWordIndex());
+                    rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute.getLemma()));
+                }
+            } else if (!w.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty() &&
+                    !w.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
                 String comparisonAttribute = w.getRelationMap().get("dobj").get(0).getLemma();
                 String comparator = w.getRelationMap().get("nmod:as").get(0).getLemma();
                 String comparatorIndex = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
                 rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
-            } else {
+            } else if (!w.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
                 String comparisonAttribute = w.getLemma();
                 String comparator = w.getRelationMap().get("nmod:as").get(0).getLemma();
                 String comparatorIndex = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
                 rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
+            } else if (!w.getRelationMap().getOrDefault("advcl", new ArrayList<>()).isEmpty()) {
+                String comparisonAttribute = w.getLemma();
+                String comparator = w.getRelationMap().get("advcl").get(0).getLemma();
+                String comparatorIndex = Integer.toString(w.getRelationMap().get("advcl").get(0).getWordIndex());
+                rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute));
+            } else if (!w.getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).isEmpty()) {
+                Word comparisonAttribute = w.getRelationMap().get("nmod:of").get(0);
+                if (!comparisonAttribute.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+                    String comparator = comparisonAttribute.getRelationMap().get("nmod:as").get(0).getLemma();
+                    String comparatorIndex = Integer.toString(comparisonAttribute.getRelationMap().get("nmod:as").get(0).getWordIndex());
+                    rules.add(getComplexExistentialPredicates(existentialItem, existentialIndex, comparator, comparatorIndex, comparisonAttribute.getLemma()));
+                }
             }
-        } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
+        } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0).getLemma().matches("right|left")) {
             String existentialItem = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
             String existentialIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
             Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0);
@@ -233,9 +260,9 @@ public class ClevrQuestionBoolean {
 
     private static List<Literal> getTransitiveLiterals(TypedDependency d, int i, List<Word> wordList, boolean lastDependency) {
         String relation = d.reln().getSpecific();
-        String gov = wordList.get(d.gov().index() -1).getLemma();
+        String gov = wordList.get(d.gov().index() - 1).getLemma();
         String govIndex = Integer.toString(d.gov().index());
-        String dep = wordList.get(d.dep().index() -1).getLemma();
+        String dep = wordList.get(d.dep().index() - 1).getLemma();
         String depIndex = Integer.toString(d.dep().index());
 
 
@@ -290,56 +317,88 @@ public class ClevrQuestionBoolean {
             String comparisonAttribute = question.semanticRoot.getLemma();
             TypedDependency c1 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nsubj")
-                            && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                            && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             //String comparator1 = c1 != null ? c1.dep().value() : null;
-            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index()-1).getLemma() : null;
+            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index() - 1).getLemma() : null;
             String comparator1Index = Integer.toString(c1.dep().index());
             TypedDependency c2 = question.dependencies.stream()
                     .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
-                            && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                            && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
                     .findFirst().orElse(null);
             //String comparator2 = c2 != null ? c2.dep().value() : null;
-            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
+            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index() - 1).getLemma() : null;
             String comparator2Index = Integer.toString(c2.dep().index());
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
         } else if (question.semanticRoot.getLemma().equalsIgnoreCase("same")) {
             String comparisonAttribute = question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).get(0).getLemma();
             TypedDependency c1 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
-                    && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(comparisonAttribute))
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(comparisonAttribute))
                     .findFirst().orElse(null);
             //String comparator1 = c1 != null ? c1.dep().value() : null;
-            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index()-1).getLemma() : null;
+            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index() - 1).getLemma() : null;
             String comparator1Index = Integer.toString(c1.dep().index());
-            TypedDependency c2 = question.dependencies.stream()
-                    .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
-                            && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
-                    .findFirst().orElse(null);
-            //String comparator2 = c2 != null ? c2.dep().value() : null;
-            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
-            String comparator2Index = Integer.toString(c2.dep().index());
-            rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+            if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                    .findFirst().isPresent()) {
+                TypedDependency c2 = question.dependencies.stream()
+                        .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                                && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                        .findFirst().get();
+                //String comparator2 = c2 != null ? c2.dep().value() : null;
+                String comparator2 = question.wordList.get(c2.dep().index() - 1).getLemma();
+                String comparator2Index = Integer.toString(c2.dep().index());
+                rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+
+            } else if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("advcl")
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                    .findFirst().isPresent()) {
+                TypedDependency c2 = question.dependencies.stream()
+                        .filter(d -> d.reln().getShortName().equalsIgnoreCase("advcl")
+                                && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma()))
+                        .findFirst().get();
+                //String comparator2 = c2 != null ? c2.dep().value() : null;
+                String comparator2 = question.wordList.get(c2.dep().index() - 1).getLemma();
+                String comparator2Index = Integer.toString(c2.dep().index());
+                rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+            }
+
+
         } else if (!question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
                 question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("dep")
-                        && question.wordList.get(d.dep().index()-1).getLemma().equalsIgnoreCase("same"))
+                        && question.wordList.get(d.dep().index() - 1).getLemma().equalsIgnoreCase("same"))
                         .findFirst().isPresent()) {
             String comparisonAttribute = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
             TypedDependency c1 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                     && d.reln().getSpecific().equalsIgnoreCase("of")
-                    && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(comparisonAttribute))
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(comparisonAttribute))
                     .findFirst().orElse(null);
 
             //String comparator1 = c1 != null ? c1.dep().value() : null;
-            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index()-1).getLemma() : null;
+            String comparator1 = c1 != null ? question.wordList.get(c1.dep().index() - 1).getLemma() : null;
             String comparator1Index = Integer.toString(c1.dep().index());
-            TypedDependency c2 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+            TypedDependency c2 = null;
+            if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                     && d.reln().getSpecific().equalsIgnoreCase("as")
-                    && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase("same"))
-                    .findFirst().orElse(null);
-           // String comparator2 = c2 != null ? c2.dep().value() : null;
-            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
-            String comparator2Index = Integer.toString(c2.dep().index());
-            rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("same"))
+                    .findFirst().isPresent()) {
+                c2 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
+                        && d.reln().getSpecific().equalsIgnoreCase("as")
+                        && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("same"))
+                        .findFirst().get();
+            } else if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("dep")
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("same"))
+                    .findFirst().isPresent()) {
+                c2 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("dep")
+                        && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("same"))
+                        .findFirst().get();
+            }
+            if (c2 != null) {
+
+                String comparator2 = question.wordList.get(c2.dep().index() - 1).getLemma();
+                String comparator2Index = Integer.toString(c2.dep().index());
+                rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+            }
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("nn") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("det", new ArrayList<>()).isEmpty() &&
                 !question.semanticRoot.getRelationMap().getOrDefault("dep", new ArrayList<>()).isEmpty() &&
@@ -350,10 +409,10 @@ public class ClevrQuestionBoolean {
             String comparator1Index = Integer.toString(question.semanticRoot.getWordIndex());
             TypedDependency c2 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                     && d.reln().getSpecific().equalsIgnoreCase("as")
-                    && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(comparisonAttribute))
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(comparisonAttribute))
                     .findFirst().orElse(null);
             //String comparator2 = c2 != null ? c2.dep().value() : null;
-            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
+            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index() - 1).getLemma() : null;
             String comparator2Index = Integer.toString(c2.dep().index());
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("nn") &&
@@ -366,10 +425,10 @@ public class ClevrQuestionBoolean {
             String comparator1Index = Integer.toString(question.semanticRoot.getWordIndex());
             TypedDependency c2 = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                     && d.reln().getSpecific().equalsIgnoreCase("as")
-                    && question.wordList.get(d.gov().index()-1).getLemma().equalsIgnoreCase(comparisonAttribute))
+                    && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(comparisonAttribute))
                     .findFirst().orElse(null);
             //String comparator2 = c2 != null ? c2.dep().value() : null;
-            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index()-1).getLemma() : null;
+            String comparator2 = c2 != null ? question.wordList.get(c2.dep().index() - 1).getLemma() : null;
             String comparator2Index = Integer.toString(c2.dep().index());
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
         } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("acl", new ArrayList<>()).isEmpty()) {
@@ -377,14 +436,27 @@ public class ClevrQuestionBoolean {
             String comparator1Index = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
             Word w = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("acl").get(0);
             String comparisonAttribute = w.getRelationMap().get("nmod:of").get(0).getLemma();
-            String comparator2 = w.getRelationMap().get("nmod:as").get(0).getLemma();
-            String comparator2Index = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
-            if (!w.getRelationMap().get("nmod:of").get(0).getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty() &&
-                    w.getRelationMap().get("nmod:of").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")) {
-                rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+            String comparator2 = null;
+            String comparator2Index = null;
+
+            if (!w.getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+                comparator2 = w.getRelationMap().get("nmod:as").get(0).getLemma();
+                comparator2Index = Integer.toString(w.getRelationMap().get("nmod:as").get(0).getWordIndex());
+            } else if (!question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("nmod:as", new ArrayList<>()).isEmpty()) {
+                comparator2 = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("nmod:as").get(0).getLemma();
+                comparator2Index = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("nmod:as").get(0).getWordIndex());
+            } else if (question.semanticRoot.getRelationMap().get("nsubj").size() == 2 &&
+                    !question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().getOrDefault("conj", new ArrayList<>()).isEmpty()){
+                comparator2 = question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("conj").get(0).getLemma();
+                comparator2Index = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getRelationMap().get("conj").get(0).getWordIndex());
             }
-        } else if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("acl")).findFirst()
-                .get().dep().value().equalsIgnoreCase("made") &&
+                if (comparator2 != null && !w.getRelationMap().get("nmod:of").get(0).getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty() &&
+                        w.getRelationMap().get("nmod:of").get(0).getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("same")) {
+                    rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
+                }
+        } else if (question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("acl")).findFirst().isPresent() &&
+                question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("acl")).findFirst()
+                        .get().dep().value().equalsIgnoreCase("made") &&
                 question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod") &&
                         d.reln().getSpecific().equalsIgnoreCase("of")
                         && d.gov().value().equalsIgnoreCase("made")).findFirst().isPresent()) {
@@ -392,13 +464,13 @@ public class ClevrQuestionBoolean {
                     && d.reln().getSpecific().equalsIgnoreCase("and")).findFirst().get();
 
             String comparator1Index = Integer.toString(c1.gov().index());
-            String comparator1 = question.wordList.get(c1.gov().index()-1).getLemma();
+            String comparator1 = question.wordList.get(c1.gov().index() - 1).getLemma();
             String comparator2Index = Integer.toString(c1.dep().index());
-            String comparator2 = question.wordList.get(c1.dep().index()-1).getLemma();
+            String comparator2 = question.wordList.get(c1.dep().index() - 1).getLemma();
             int comparisonAttributeIndex = question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                     && d.reln().getSpecific().equalsIgnoreCase("of")
                     && d.gov().value().equalsIgnoreCase("made")).findFirst().get().dep().index();
-            String comparisonAttribute = question.wordList.get(comparisonAttributeIndex-1).getLemma();
+            String comparisonAttribute = question.wordList.get(comparisonAttributeIndex - 1).getLemma();
             rules.add(getEqualComparisonRules(comparisonAttribute, comparator1, comparator2, comparator1Index, comparator2Index));
         }
         return rules;
@@ -410,18 +482,28 @@ public class ClevrQuestionBoolean {
         if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-JJR") &&
                 comparatorWord.get().getLemma().matches("less|greater") &&
                 !comparatorWord.get().getRelationMap().getOrDefault("nmod:than", new ArrayList<>()).isEmpty()) {
+            TypedDependency c1 = null;
+            if (question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("amod")
+                    && r.dep().value().matches("less|greater")).findFirst().isPresent()) {
+                c1 = question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("amod")
+                        && r.dep().value().matches("less|greater")).findFirst().get();
+            } else if (question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("dobj")
+                    && r.dep().value().matches("less|greater")).findFirst().isPresent()) {
+                c1 = question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("dobj")
+                        && r.dep().value().matches("less|greater")).findFirst().get();
+            }
+            if (c1 != null) {
+                String object1Index = c1 != null ? Integer.toString(c1.gov().index()) : null;
+                //String object1 = question.wordList.stream().filter(w -> w.getWordIndex() == Integer.parseInt(object1Index)).findFirst().get().getLemma();
+                String object1 = question.wordList.get(Integer.parseInt(object1Index) - 1).getLemma();
+                String object2 = comparatorWord.get().getRelationMap().get("nmod:than")
+                        .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getLemma();
+                String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
+                        .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
 
-            TypedDependency c1 = question.dependencies.stream().filter(r -> r.reln().getShortName().equalsIgnoreCase("amod")
-                    && r.dep().value().matches("less|greater")).findFirst().orElse(null);
-            String object1Index = c1 != null ? Integer.toString(c1.gov().index()) : null;
-            //String object1 = question.wordList.stream().filter(w -> w.getWordIndex() == Integer.parseInt(object1Index)).findFirst().get().getLemma();
-            String object1 = question.wordList.get(Integer.parseInt(object1Index) - 1).getLemma();
-            String object2 = comparatorWord.get().getRelationMap().get("nmod:than")
-                    .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getLemma();
-            String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
-                    .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getWordIndex());
+                rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get().getLemma()));
+            }
 
-            rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, comparatorWord.get().getLemma()));
         } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("RBR|JJ-RBR")
                 && comparatorWord.get().getLemma().matches("less|greater") &&
                 !comparatorWord.get().getRelationMap().getOrDefault("nmod:than", new ArrayList<>()).isEmpty()) {
@@ -431,7 +513,7 @@ public class ClevrQuestionBoolean {
             //String object1 = c1 != null ? c1.gov().value() : null;
             String object1Index = c1 != null ? Integer.toString(c1.dep().index()) : null;
             //String object1 = question.wordList.stream().filter(w -> w.getWordIndex() == Integer.parseInt(object1Index)).findFirst().get().getLemma();
-            String object1 = question.wordList.get(Integer.parseInt(object1Index)-1).getLemma();
+            String object1 = question.wordList.get(Integer.parseInt(object1Index) - 1).getLemma();
             String object2 = comparatorWord.get().getRelationMap().get("nmod:than")
                     .get(0).getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).get(0).getLemma();
             String object2Index = Integer.toString(comparatorWord.get().getRelationMap().get("nmod:than")
@@ -441,6 +523,7 @@ public class ClevrQuestionBoolean {
 
         } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("JJR|JJ-JJR") &&
                 comparatorWord.get().getLemma().matches("fewer") &&
+                !question.wordList.stream().filter(w -> w.getWord().matches("left|right|behind|front")).findFirst().isPresent() &&
                 question.dependencies.stream()
                         .filter(d -> d.reln().getShortName().equalsIgnoreCase("nmod")
                                 && d.reln().getSpecific().equalsIgnoreCase("than")).findFirst().isPresent()) {
@@ -453,6 +536,7 @@ public class ClevrQuestionBoolean {
             rules.add(getArithmaticRulesBody(object1, object1Index, object2, object2Index, "less"));
         } else if (comparatorWord.isPresent() && comparatorWord.get().getPOSTag().matches("RBR|JJ-RBR") &&
                 comparatorWord.get().getLemma().equalsIgnoreCase("more") &&
+                !question.wordList.stream().filter(w -> w.getWord().matches("left|right|behind|front")).findFirst().isPresent() &&
                 !question.semanticRoot.getRelationMap().get("advmod").get(0).getRelationMap().getOrDefault("dep", new ArrayList<>()).isEmpty()) {
             Word o1 = question.semanticRoot.getRelationMap().get("advmod").get(0).getRelationMap().get("dep").get(0);
             String object1 = o1.getLemma();
@@ -560,8 +644,6 @@ public class ClevrQuestionBoolean {
         }
         return r;
     }
-
-
 
 
     private static Rule getComplexExistentialPredicates(String exitentialItem, String existentialIndex, String comparator,

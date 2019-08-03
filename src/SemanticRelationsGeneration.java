@@ -92,6 +92,9 @@ public class SemanticRelationsGeneration {
             else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("rubber")){
                 relation = "amod";
             }
+            else if(relation.equalsIgnoreCase("nsubj") && dep.equalsIgnoreCase("rubber")){
+                relation = "amod";
+            }
             else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("matte")){
                 relation = "amod";
             }
@@ -103,6 +106,11 @@ public class SemanticRelationsGeneration {
             }
             else if(relation.equalsIgnoreCase("auxpass") && gov.equalsIgnoreCase("left")){
                 relation = "cop";
+            }
+            else if(relation.equalsIgnoreCase("acl_relcl") && dep.equalsIgnoreCase("block")
+                    && sentence.dependencies.stream().filter( d -> d.reln().toString().equalsIgnoreCase("mark") &&
+                    indexLemmaMap.get(d.gov().index()).equalsIgnoreCase(dep) && indexLemmaMap.get(d.dep().index()).equalsIgnoreCase("as")).findFirst().isPresent()){
+                relation = "nmod_as";
             }
 
 

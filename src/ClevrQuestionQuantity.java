@@ -1,5 +1,6 @@
 import edu.stanford.nlp.trees.TypedDependency;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,6 +55,7 @@ public class ClevrQuestionQuantity {
                         !question.semanticRoot.getRelationMap().getOrDefault("nmod:in_front_of", new ArrayList<>()).isEmpty())) {
             rules.addAll(getReferencedRule(question));
         } else if (question.semanticRoot.getPOSTag().matches("NNS") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("conj", new ArrayList<>()).isEmpty() &&
                 question.dependencies.stream().filter(d -> d.reln().getShortName().equalsIgnoreCase("conj")
                         && d.reln().getSpecific().equalsIgnoreCase("or")
                         && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase(question.semanticRoot.getLemma())).findFirst().isPresent()) {
@@ -73,7 +75,7 @@ public class ClevrQuestionQuantity {
             rules.addAll(getComparisonRules(question));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbn") && question.semanticRoot.getLemma().equalsIgnoreCase("make") &&
                 question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("amod")
-                        && question.wordList.get(d.dep().index() -1).getLemma().equalsIgnoreCase("same")).findFirst().isPresent()) {
+                        && question.wordList.get(d.dep().index() - 1).getLemma().equalsIgnoreCase("same")).findFirst().isPresent()) {
             rules.addAll(getComparisonRules(question));
         }
         rules = ClevrQuestionCommonRules.modifyCommonQueryRules(rules, false);
@@ -151,30 +153,45 @@ public class ClevrQuestionQuantity {
                 !question.semanticRoot.getRelationMap().getOrDefault("nmod:of", new ArrayList<>()).isEmpty()) {
 
             Word o = null;
-            if(question.information.questionType == QuestionType.WHAT && !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
-            question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma().equalsIgnoreCase("number")){
+            if (question.information.questionType == QuestionType.WHAT && !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                    question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma().equalsIgnoreCase("number")) {
                 TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:of")
                         && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("number")).findFirst().get();
                 o = question.wordList.get(c.dep().index() - 1);
-            }
-            else{
+            } else {
                 o = question.semanticRoot.getRelationMap().get("nsubj").get(0);
             }
 
             String countingObjectIndex = Integer.toString(o.getWordIndex());
             String countingObject = o.getLemma();
             String comparisonAttribute = question.semanticRoot.getRelationMap().get("nmod:of").get(0).getLemma();
-            int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
-            String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
-            if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
-                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
-                        comparatorObject, comparisonAttribute, true));
-            } else {
-                rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
-                        comparatorObject, comparisonAttribute, false));
+
+            if(question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().isPresent()){
+                int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:as")).findFirst().get().dep().index();
+                String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+                if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                    rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                            comparatorObject, comparisonAttribute, true));
+                } else {
+                    rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                            comparatorObject, comparisonAttribute, false));
+                }
             }
+            else if(question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("acl:relcl")).findFirst().isPresent()){
+                int comparatorObjectIndex = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("acl:relcl")).findFirst().get().dep().index();
+                String comparatorObject = question.wordList.get(comparatorObjectIndex - 1).getLemma();
+                if (o.getRelationMap().get("amod").stream().filter(w -> w.getLemma().equalsIgnoreCase("other")).findFirst().isPresent()) {
+                    rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                            comparatorObject, comparisonAttribute, true));
+                } else {
+                    rules.add(getComparisonRuleLiterals(countingObjectIndex, countingObject, Integer.toString(comparatorObjectIndex),
+                            comparatorObject, comparisonAttribute, false));
+                }
+            }
+
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty() &&
                 question.semanticRoot.getRelationMap().get("dobj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
                         && w.getRelationMap().get("amod").get(0).getLemma().equalsIgnoreCase("many")).findFirst().isPresent() &&
                 question.semanticRoot.getRelationMap().get("nsubj").stream().filter(w -> !w.getRelationMap().getOrDefault("amod", new ArrayList<>()).isEmpty()
@@ -376,7 +393,8 @@ public class ClevrQuestionQuantity {
             rules.add(getOrPredicates(object1, object1Index, object2, object2Index, parentObject, parentObjectIndex));
 
 
-        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP")) {
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP") &&
+                question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty()) {
             TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("conj:or")).findFirst().get();
             int object1Index = c.gov().index();
             String object1 = question.wordList.get(object1Index - 1).getLemma();
@@ -392,11 +410,27 @@ public class ClevrQuestionQuantity {
 
 
             rules.add(getOrPredicates(object1, Integer.toString(object1Index), object2, Integer.toString(object2Index), parentObject.getLemma(), Integer.toString(parentObject.getWordIndex())));
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBP") &&
+                !question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty() &&
+                !question.semanticRoot.getRelationMap().get("dobj").get(0).getRelationMap().getOrDefault("amod",new ArrayList<>()).isEmpty() &&
+                question.semanticRoot.getRelationMap().get("dobj").get(0).getRelationMap().get("amod").stream()
+                        .filter(w -> w.getLemma().equalsIgnoreCase("many")).findFirst().isPresent())  {
+            TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("conj:or")).findFirst().get();
+            int object1Index = c.gov().index();
+            String object1 = question.wordList.get(object1Index - 1).getLemma();
+            int object2Index = c.dep().index();
+            String object2 = question.wordList.get(object2Index - 1).getLemma();
+            Word parentObject = question.semanticRoot.getRelationMap().get("dobj").get(0);
+
+            rules.add(getOrPredicates(object1, Integer.toString(object1Index), object2, Integer.toString(object2Index),
+                    parentObject.getLemma(), Integer.toString(parentObject.getWordIndex())));
         }
         return rules;
+
     }
 
-    private static Rule getOrPredicates(String object1, String object1Index, String object2, String object2Index, String parentObject, String parentObjectIndex) {
+    private static Rule getOrPredicates(String object1, String object1Index, String object2, String
+            object2Index, String parentObject, String parentObjectIndex) {
 
         Literal head = null;
         List<Literal> body = new ArrayList<>();
@@ -454,18 +488,43 @@ public class ClevrQuestionQuantity {
 
     private static List<Rule> getReferencedRule(Question question) {
         List<Rule> rules = new ArrayList<>();
-        if (question.information.questionType == QuestionType.WHAT) {
+        if (question.information.questionType == QuestionType.WHAT &&
+                question.wordList.stream().filter(w -> w.getLemma().matches("front|behind")).findFirst().isPresent() &&
+                !question.wordList.stream().filter(w -> w.getLemma().matches("left|right")).findFirst().isPresent()) {
             String direction = null;
-            if (question.semanticRoot.getRelationMap().get("case").get(0).getLemma().equalsIgnoreCase("behind")) {
+            if(question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp")){
+                if(!question.semanticRoot.getRelationMap().getOrDefault("nmod:behind", new ArrayList<>()).isEmpty()){
+                    direction = "behind";
+                }
+                else if(!question.semanticRoot.getRelationMap().getOrDefault("nmod:in_front_of", new ArrayList<>()).isEmpty()){
+                    direction = "front";
+                }
+            }
+            if (!question.semanticRoot.getRelationMap().getOrDefault("case",new ArrayList<>()).isEmpty() &&
+                    question.semanticRoot.getRelationMap().get("case").get(0).getLemma().equalsIgnoreCase("behind")) {
                 direction = "behind";
-            } else if (question.semanticRoot.getRelationMap().get("case").get(0).getLemma().equalsIgnoreCase("in") &&
+            } else if (!question.semanticRoot.getRelationMap().getOrDefault("case",new ArrayList<>()).isEmpty() &&
+                    question.semanticRoot.getRelationMap().get("case").get(0).getLemma().equalsIgnoreCase("in") &&
                     question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("mwe")
                             && question.wordList.get(d.dep().index() - 1).getLemma().equalsIgnoreCase("front")).findFirst().isPresent()) {
                 direction = "front";
             }
 
-            String referencedIndex = Integer.toString(question.semanticRoot.getWordIndex());
-            String referencedObject = question.semanticRoot.getLemma();
+
+            String referencedIndex = null;
+            String referencedObject = null;
+            if(question.semanticRoot.getPOSTag().equalsIgnoreCase("vbp")){
+                TypedDependency c = question.dependencies.stream().filter(d -> (d.reln().toString().equalsIgnoreCase("nmod:behind") ||
+                        d.reln().toString().equalsIgnoreCase("nmod:in_front_of"))).findFirst().orElse(null);
+                if(c != null){
+                    referencedIndex = Integer.toString(c.dep().index());
+                    referencedObject = question.wordList.get(Integer.parseInt(referencedIndex)-1).getLemma();
+                }
+            }
+            else {
+                referencedIndex = Integer.toString(question.semanticRoot.getWordIndex());
+                referencedObject = question.semanticRoot.getLemma();
+            }
             TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:of") &&
                     question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("number")).findFirst().orElse(null);
             String countingObjectIndex = Integer.toString(c.dep().index());
@@ -482,7 +541,13 @@ public class ClevrQuestionQuantity {
             String countingObjectIndex = null;
             String countingObject = null;
 
-            if (!question.semanticRoot.getRelationMap().getOrDefault("nsubjpass", new ArrayList<>()).isEmpty()) {
+            if(question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:of")
+                    && d.gov().value().equalsIgnoreCase("number")).findFirst().isPresent()){
+                TypedDependency c = question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:of") && d.gov().value().equalsIgnoreCase("number")).findFirst().get();
+                countingObjectIndex = Integer.toString(c.dep().index());
+                countingObject = question.wordList.get(Integer.parseInt(countingObjectIndex) - 1).getLemma();
+            }
+            else if (!question.semanticRoot.getRelationMap().getOrDefault("nsubjpass", new ArrayList<>()).isEmpty()) {
                 countingObjectIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubjpass").get(0).getWordIndex());
                 countingObject = question.semanticRoot.getRelationMap().get("nsubjpass").get(0).getLemma();
             } else if (!question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty()) {
@@ -518,7 +583,8 @@ public class ClevrQuestionQuantity {
         return rules;
     }
 
-    private static Rule getReferencedPredicates(String direction, String countingObject, String countingObjectIndex, String referencedObject, String referencedIndex) {
+    private static Rule getReferencedPredicates(String direction, String countingObject, String
+            countingObjectIndex, String referencedObject, String referencedIndex) {
         Literal head = null;
         List<Literal> body = new ArrayList<>();
 

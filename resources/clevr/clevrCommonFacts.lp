@@ -16,20 +16,24 @@ is_property(cube,shape).
 is_property(cylinder,shape).
 is_property(sphere,shape).
 
-is_property(nonmetal,material).
+%is_property(nonmetal,material).
 is_property(metal,material).
-is_property(matte,material).
+%is_property(matte,material).
 is_property(rubber,material).
 
 is_property(small,size).
 is_property(medium,size).
+%is_property(large,size).
 is_property(large,size).
-is_property(big,size).
-is_property(tiny,size).
+%is_property(tiny,size).
 
 is_similar(block,cube).
 is_similar(ball,sphere).
 is_similar(metallic,metal).
 is_similar(shiny,metal).
+is_similar(matte,rubber).
+is_similar(tiny,small).
+is_similar(big,large).
+
 
 

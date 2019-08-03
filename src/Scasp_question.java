@@ -85,6 +85,13 @@ public class Scasp_question {
                 w.setPOSTag("JJ");
                 w.setLemma("left");
             }
+            else if(w.getWord().equalsIgnoreCase("left") && w.getPOSTag().equalsIgnoreCase("vbd")){
+                w.setPOSTag("JJ");
+                w.setLemma("left");
+            }
+            else if(w.getLemma().equalsIgnoreCase("block") && w.getPOSTag().equalsIgnoreCase("vb")){
+                w.setPOSTag("NN");
+            }
         });
 
         return question;

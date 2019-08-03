@@ -14,7 +14,7 @@ public class ClevrQuestionCommonRules {
         List<Rule> commonRules = new ArrayList<>();
         if (isBooleanQuestion) {
             terms.add(new Literal(new Word(question.sentenceString.replaceAll("'", ""), false)));
-            terms.add(new Literal(new Word("true", false)));
+            terms.add(new Literal(new Word("yes", false)));
             head = new Literal(new Word("question_answer", false), terms);
 
             terms = new ArrayList<>();
@@ -26,7 +26,7 @@ public class ClevrQuestionCommonRules {
 
             terms = new ArrayList<>();
             terms.add(new Literal(new Word(question.sentenceString.replaceAll("'", ""), false)));
-            terms.add(new Literal(new Word("false", false)));
+            terms.add(new Literal(new Word("no", false)));
             head = new Literal(new Word("question_answer", false), terms);
 
 
