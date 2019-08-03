@@ -40,15 +40,17 @@ public class Question extends Sentence {
     }
 
     private QuestionType getQuestionTypeClevr(Word questionWord) {
-        String w = questionWord.getWord().toLowerCase();
-        if (w.matches("is|are")) {
-            return QuestionType.TRUE_FALSE;
-        } else if (questionWord.getLemma().equalsIgnoreCase("how")
-                && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")) {
-            String newWordString = questionWord.getLemma() + "_" + this.wordList.get(questionWord.getWordIndex()).getLemma();
-            return GetQuestionType(newWordString);
-        } else if (w.toLowerCase().equalsIgnoreCase("what")) {
-            return QuestionType.WHAT;
+        if(questionWord != null) {
+            String w = questionWord.getWord().toLowerCase();
+            if (w.matches("is|are")) {
+                return QuestionType.TRUE_FALSE;
+            } else if (questionWord.getLemma().equalsIgnoreCase("how")
+                    && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")) {
+                String newWordString = questionWord.getLemma() + "_" + this.wordList.get(questionWord.getWordIndex()).getLemma();
+                return GetQuestionType(newWordString);
+            } else if (w.toLowerCase().equalsIgnoreCase("what")) {
+                return QuestionType.WHAT;
+            }
         }
         return QuestionType.UNKNOWN;
     }
@@ -61,6 +63,8 @@ public class Question extends Sentence {
             questionWord = this.wordList.get(0);
         } else if (this.wordList.get(0).getLemma().equalsIgnoreCase("what")) {
             questionWord = this.wordList.get(0);
+        }else if(this.wordList.stream().filter(w -> w.getLemma().matches("what|how")).findFirst().isPresent()){
+            questionWord = this.wordList.stream().filter(w -> w.getLemma().matches("what|how")).findFirst().get();
         }
         return questionWord;
     }

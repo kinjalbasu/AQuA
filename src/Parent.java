@@ -142,6 +142,7 @@ public class Parent {
 
         int totalQuestions = 0;
         int correctQuestions = 0;
+        int incorrectQuestions = 0;
 
         String incorrectQuestionPath = "resources/questions/incorrectQuestions.txt";
 
@@ -209,6 +210,9 @@ public class Parent {
                 bw1.write(line + " ~~~~~~~~~ " + " Calculated Answer : " + answerPrediction);
                 bw1.newLine();
                 System.out.println(line);
+                if(!answerPrediction.equalsIgnoreCase("EXCEPTIONS OCCURED")){
+                    incorrectQuestions++;
+                }
             }
 
             endTime = System.currentTimeMillis();
@@ -226,8 +230,15 @@ public class Parent {
         System.out.println("Total Process Time: " + totalTime + " Sec");
 
         double accuracy = (double) correctQuestions / (double) totalQuestions;
-        System.out.println(accuracy);
+        System.out.println("Accuracy : " + (accuracy*100));
 
+        System.out.println("Total Questions : " + totalQuestions);
+        System.out.println("correct questions : " + correctQuestions );
+        System.out.println("Incorrect questions : " + incorrectQuestions );
+        System.out.println("Exception Occured : " + (totalQuestions - incorrectQuestions - correctQuestions));
+
+        accuracy = (double) correctQuestions / (double) (correctQuestions + incorrectQuestions);
+        System.out.println("Accuracy without Exceptions : " + (accuracy*100));
         //System.out.println("No Answer (Time Out)");
         //        System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
         //      questionFlag = scan.nextLine();
