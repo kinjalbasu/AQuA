@@ -1,9 +1,8 @@
-object(1,cube,purple,metal,small,242,82).
-object(2,cube,gray,metal,small,298,211).
-object(3,cube,gray,rubber,small,192,109).
-object(4,sphere,yellow,metal,large,424,138).
-object(5,sphere,yellow,rubber,large,311,144).
-object(6,cylinder,purple,rubber,large,156,181).
-object(7,cube,purple,rubber,large,318,110).
-object(8,sphere,brown,rubber,large,90,112).
-object(9,sphere,green,metal,large,244,234).
+object(1,cube,purple,metal,small,242,103).
+object(2,cube,gray,metal,small,298,241).
+object(3,cube,gray,rubber,small,192,131).
+object(4,sphere,yellow,metal,large,424,180).
+object(5,cylinder,purple,rubber,large,156,236).
+object(6,cube,purple,rubber,large,318,157).
+object(7,sphere,brown,rubber,large,90,151).
+object(8,sphere,green,metal,large,244,279).

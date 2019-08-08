@@ -42,13 +42,18 @@ public class Question extends Sentence {
     private QuestionType getQuestionTypeClevr(Word questionWord) {
         if(questionWord != null) {
             String w = questionWord.getWord().toLowerCase();
-            if (w.matches("is|are")) {
+            if (w.matches("is|are|does")) {
                 return QuestionType.TRUE_FALSE;
             } else if (questionWord.getLemma().equalsIgnoreCase("how")
                     && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("much|many")) {
                 String newWordString = questionWord.getLemma() + "_" + this.wordList.get(questionWord.getWordIndex()).getLemma();
                 return GetQuestionType(newWordString);
-            } else if (w.toLowerCase().equalsIgnoreCase("what")) {
+            }
+            else if(questionWord.getLemma().equalsIgnoreCase("how")
+                    && this.wordList.get(questionWord.getWordIndex()).getLemma().matches("big|small")){
+                return QuestionType.WHAT;
+            }
+            else if (w.toLowerCase().equalsIgnoreCase("what")) {
                 return QuestionType.WHAT;
             }
         }
@@ -57,7 +62,7 @@ public class Question extends Sentence {
 
     private Word getQuestionWordClevr() {
         Word questionWord = null;
-        if (this.wordList.get(0).getWord().toLowerCase().matches("is|are")) {
+        if (this.wordList.get(0).getWord().toLowerCase().matches("is|are|does")) {
             questionWord = this.wordList.get(0);
         } else if (this.wordList.get(0).getLemma().equalsIgnoreCase("how")) {
             questionWord = this.wordList.get(0);

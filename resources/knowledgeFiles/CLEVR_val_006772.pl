@@ -1,3 +1,3 @@
-object(1,sphere,green,rubber,large,212,209).
-object(2,sphere,blue,metal,large,341,163).
-object(3,sphere,blue,metal,large,74,119).
+object(1,sphere,green,rubber,large,212,249).
+object(2,sphere,blue,metal,large,341,206).
+object(3,sphere,blue,metal,large,74,159).

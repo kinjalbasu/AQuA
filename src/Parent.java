@@ -143,21 +143,33 @@ public class Parent {
         int totalQuestions = 0;
         int correctQuestions = 0;
         int incorrectQuestions = 0;
+        int queryNotGeneratedCount = 0;
+        int queryGeneratedExceptionCount = 0;
+        boolean queryNotGeneratedFlag = false;
 
         String incorrectQuestionPath = "resources/questions/incorrectQuestions.txt";
+        String queryNotGeneratedQuestionPath = "resources/questions/queryNotGeneratedQuestionPath.txt";
 
+        //clear files
         FileWriter fw = new FileWriter(new File(incorrectQuestionPath));
         BufferedWriter bw = new BufferedWriter(fw);
         bw.close();
 
+        FileWriter fw2 = new FileWriter(new File(queryNotGeneratedQuestionPath));
+        BufferedWriter bw2 = new BufferedWriter(fw2);
+        bw2.close();
 
+
+        //String line = "CLEVR_val_001297.png,How many objects are small matte objects or objects behind the brown cube?,8";
         String line = br.readLine();
-        //String line = "CLEVR_val_002501.png,How many blue things are the same size as the rubber block?,2";
+
         long st = System.currentTimeMillis();
         while (line != null) {
             FileWriter fw1 = new FileWriter(new File(incorrectQuestionPath), true);
             BufferedWriter bw1 = new BufferedWriter(fw1);
 
+            FileWriter fw22 = new FileWriter(new File(queryNotGeneratedQuestionPath), true);
+            BufferedWriter bw22 = new BufferedWriter(fw22);
 
             startTime = System.currentTimeMillis();
             totalQuestions++;
@@ -169,7 +181,9 @@ public class Parent {
 
             FileWriter fw3 = new FileWriter(question_output);
             BufferedWriter bw3 = new BufferedWriter(fw3);
-            bw3.write(":- include('clevrKnowledge.pl').\n" +
+            bw3.write(":-style_check(-singleton).\n"+
+                    ":-style_check(-discontiguous).\n" +
+                    ":- include('clevrKnowledge.pl').\n" +
                     ":- include('clevrRules.pl').\n" +
                     ":- include('clevrSemanticRules.pl').\n" +
                     ":- include('clevrCommonFacts.pl').");
@@ -183,6 +197,7 @@ public class Parent {
             Scasp_question.printQuestion(question, bw3);
             bw3.close();
             generatePrologCompatibleCode();
+            queryNotGeneratedFlag = checkQueryGenerated();
             String t = "consult('resources/clevrProlog/clevrQuery.pl')";
             Query q = new Query(t);
             if (!q.hasSolution()) {
@@ -207,10 +222,21 @@ public class Parent {
 
             } else {
                 System.out.println("Incorrect");
-                bw1.write(line + " ~~~~~~~~~ " + " Calculated Answer : " + answerPrediction);
-                bw1.newLine();
-                System.out.println(line);
-                if(!answerPrediction.equalsIgnoreCase("EXCEPTIONS OCCURED")){
+                if(queryNotGeneratedFlag){
+                    bw22.write(line + " ~~~~~~~~~ " + " Calculated Answer : " + answerPrediction);
+                    bw22.newLine();
+                    queryNotGeneratedCount ++;
+                }
+                else{
+                    bw1.write(line + " ~~~~~~~~~ " + " Calculated Answer : " + answerPrediction);
+                    bw1.newLine();
+                    if (answerPrediction.equalsIgnoreCase("EXCEPTIONS OCCURED")) {
+                        queryGeneratedExceptionCount++;
+                    }
+                }
+
+                //System.out.println(line);
+                if (!answerPrediction.equalsIgnoreCase("EXCEPTIONS OCCURED")) {
                     incorrectQuestions++;
                 }
             }
@@ -222,28 +248,45 @@ public class Parent {
             line = br.readLine();
             System.out.println();
             bw1.close();
-
-
-       }
+            bw22.close();
+        }
         long et = System.currentTimeMillis();
         double totalTime = ((double) et - (double) st) / 1000;
         System.out.println("Total Process Time: " + totalTime + " Sec");
 
         double accuracy = (double) correctQuestions / (double) totalQuestions;
-        System.out.println("Accuracy : " + (accuracy*100));
+        System.out.println("Accuracy : " + (accuracy * 100));
 
         System.out.println("Total Questions : " + totalQuestions);
-        System.out.println("correct questions : " + correctQuestions );
-        System.out.println("Incorrect questions : " + incorrectQuestions );
+        System.out.println("Correct Questions : " + correctQuestions);
+        System.out.println("Wrong Answers Questions : " + incorrectQuestions);
         System.out.println("Exception Occured : " + (totalQuestions - incorrectQuestions - correctQuestions));
-
+        System.out.println("Exceptions - Query Not Generated : " + queryNotGeneratedCount);
+        System.out.println("Exceptions - Query Generated : " + queryGeneratedExceptionCount);
         accuracy = (double) correctQuestions / (double) (correctQuestions + incorrectQuestions);
-        System.out.println("Accuracy without Exceptions : " + (accuracy*100));
+        System.out.println("Accuracy without Any Exceptions : " + (accuracy * 100));
+        accuracy = (double) correctQuestions / (double) (correctQuestions + incorrectQuestions + queryGeneratedExceptionCount);
+        System.out.println("Accuracy without Query not Generated Exceptions : " + (accuracy * 100));
         //System.out.println("No Answer (Time Out)");
         //        System.out.print("\nDO YOU HAVA ANYMORE QUESTION? (y/n) ");
         //      questionFlag = scan.nextLine();
 
         //      } while (!questionFlag.toLowerCase().equals("n"));
+    }
+
+    private static boolean checkQueryGenerated() throws IOException {
+        boolean flag = true;
+        FileReader fr = new FileReader(new File("resources/clevrProlog/clevrQuery.pl"));
+        BufferedReader br = new BufferedReader(fr);
+        String line = br.readLine();
+        while(line != null){
+            if(line.startsWith("find_ans(Q, A)") || line.startsWith("find_ans(Q)")){
+                flag = false;
+                break;
+            }
+            line = br.readLine();
+        }
+        return  flag;
     }
 
     private static void generateKnowledgeFile(String image_file, String knowledgePath) throws IOException {

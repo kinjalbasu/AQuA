@@ -1,3 +1,2 @@
-object(1,cylinder,cyan,metal,small,315,131).
-object(2,cube,cyan,metal,large,237,84).
-object(3,cube,blue,metal,large,280,161).
+object(1,cube,cyan,metal,large,237,124).
+object(2,cube,blue,metal,large,280,220).

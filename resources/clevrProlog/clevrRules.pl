@@ -114,8 +114,8 @@ smaller_equal(Id1,Id2) :- property(Id1,size,S1), property(Id2,size,S2), size_ord
 left_compare(Id1,Id2) :- property(Id1,centerX,X1),property(Id2,centerX,X2),X1 > X2.
 right_compare(Id1,Id2) :- property(Id1,centerX,X1),property(Id2,centerX,X2),X1 < X2.
 
-behind_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 < Y2.
-front_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 > Y2.
+behind_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 > Y2.
+front_compare(Id1,Id2) :- property(Id1,centerY,Y1),property(Id2,centerY,Y2),Y1 < Y2.
 
 %----Find Order----------
 order_by_size(L) :- get_all_id(L1), mergesort(L1,L,size).
