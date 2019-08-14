@@ -12,17 +12,22 @@ public class ClevrQuestionValue {
         ClevrQuestionCommonRules.generateFacts(question, nouns);
         if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbz") && nouns.size() == 2) {
             rules.addAll(getSimpleValueRules(question));
-        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("wp") && nouns.size() == 2) {
+        } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("wp") && nouns.size() == 2 &&
+                !question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("acl")
+                        && d.dep().value().equalsIgnoreCase("made")).findFirst().isPresent()) {
             rules.addAll(getSimpleValueRules(question));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("wp") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
                 question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod")
-                        && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("make")).findFirst().isPresent()) {
+                        && question.wordList.get(d.gov().index() - 1).getLemma().equalsIgnoreCase("make")).findFirst().isPresent() &&
+        !question.wordList.stream().filter(w -> w.getWord().matches("left|right|behind|front")).findFirst().isPresent()) {
             rules.addAll(getSimpleMadeRules(question));
         } else if (question.semanticRoot.getPOSTag().equalsIgnoreCase("vbz") &&
                 !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
                 !question.semanticRoot.getRelationMap().getOrDefault("dobj", new ArrayList<>()).isEmpty() &&
-                question.dependencies.stream().filter(d -> d.reln().toString().equalsIgnoreCase("nmod:behind")).findFirst().isPresent()) {
+                !question.wordList.stream().filter(w -> w.getWord().matches("left|right")).findFirst().isPresent() &&
+                question.dependencies.stream().filter(d -> d.reln().toString().matches("nmod:behind|nmod:in_front_of"))
+                        .collect(Collectors.toList()).size() == 1) {
             rules.addAll(getReferencedObject(question));
         } else if (question.information.questionWord.getLemma().equalsIgnoreCase("how") &&
                 question.information.questionType == QuestionType.WHAT) {
@@ -42,7 +47,8 @@ public class ClevrQuestionValue {
         String referencedObject = null;
         String referencedObjectIndex = null;
         if (question.semanticRoot.getPOSTag().equalsIgnoreCase("VBZ") &&
-                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty()) {
+                !question.semanticRoot.getRelationMap().getOrDefault("nsubj", new ArrayList<>()).isEmpty() &&
+                !question.wordList.stream().filter(w -> w.getWord().toLowerCase().matches("left|right|behind|front")).findFirst().isPresent()) {
             referencedObject = question.semanticRoot.getRelationMap().get("nsubj").get(0).getLemma();
             referencedObjectIndex = Integer.toString(question.semanticRoot.getRelationMap().get("nsubj").get(0).getWordIndex());
             rules.add(getSimpleValueRuleLiterals(attribute, referencedObjectIndex, referencedObject));

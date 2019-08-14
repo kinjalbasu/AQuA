@@ -220,6 +220,7 @@ public class Parent {
                 System.out.println("Correct");
                 correctQuestions++;
 
+
             } else {
                 System.out.println("Incorrect");
                 if(queryNotGeneratedFlag){
@@ -290,6 +291,7 @@ public class Parent {
     }
 
     private static void generateKnowledgeFile(String image_file, String knowledgePath) throws IOException {
+        //String root = "C:\\Users\\kinja\\OneDrive - The University of Texas at Dallas\\TempFiles\\outputPrologJson\\";
         String root = "resources/knowledgeFiles/";
         image_file = image_file.substring(0, image_file.indexOf(".")) + ".pl";
         String filePath = root + image_file;

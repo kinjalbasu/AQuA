@@ -81,6 +81,9 @@ public class Scasp_question {
             else if(w.getLemma().equalsIgnoreCase("cyan") && w.getPOSTag().equalsIgnoreCase("nn")){
                 w.setPOSTag("JJ");
             }
+            else if(w.getLemma().equalsIgnoreCase("yellow") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
             else if(w.getWord().equalsIgnoreCase("left") && w.getPOSTag().equalsIgnoreCase("vbn")){
                 w.setPOSTag("JJ");
                 w.setLemma("left");
@@ -91,6 +94,15 @@ public class Scasp_question {
             }
             else if(w.getLemma().equalsIgnoreCase("block") && w.getPOSTag().equalsIgnoreCase("vb")){
                 w.setPOSTag("NN");
+            }
+            else if(w.getLemma().equalsIgnoreCase("block") && w.getPOSTag().equalsIgnoreCase("vbz")){
+                w.setPOSTag("NN");
+            }
+            else if(w.getLemma().equalsIgnoreCase("red") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
+            }
+            else if(w.getLemma().equalsIgnoreCase("blue") && w.getPOSTag().equalsIgnoreCase("nn")){
+                w.setPOSTag("JJ");
             }
         });
 

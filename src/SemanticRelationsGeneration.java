@@ -92,6 +92,15 @@ public class SemanticRelationsGeneration {
             else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("rubber")){
                 relation = "amod";
             }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("red")){
+                relation = "amod";
+            }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("blue")){
+                relation = "amod";
+            }
+            else if(relation.equalsIgnoreCase("compound") && dep.equalsIgnoreCase("yellow")){
+                relation = "amod";
+            }
             else if(relation.equalsIgnoreCase("nsubj") && dep.equalsIgnoreCase("rubber")){
                 relation = "amod";
             }
@@ -111,6 +120,9 @@ public class SemanticRelationsGeneration {
                     && sentence.dependencies.stream().filter( d -> d.reln().toString().equalsIgnoreCase("mark") &&
                     indexLemmaMap.get(d.gov().index()).equalsIgnoreCase(dep) && indexLemmaMap.get(d.dep().index()).equalsIgnoreCase("as")).findFirst().isPresent()){
                 relation = "nmod_as";
+            }
+            else if(relation.equalsIgnoreCase("dep") && dep.equalsIgnoreCase("block")){
+                relation = "nsubj";
             }
 
 
@@ -144,7 +156,7 @@ public class SemanticRelationsGeneration {
                 sementicRelations.add(getSynonymRule(gov, dep));
             }
 
-            if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an|any")){
+            if(relation.equalsIgnoreCase("det") && dep.toLowerCase().matches("a|an|any|another")){
                 sementicRelations.add(getQuantificationRule(dependency,sentence.wordList));
             }
 
