@@ -1,6 +1,8 @@
 # AQuA
 Answer Set Programming based Visual Question Answering
 
+Work is still in progress.
+
 ### Software’s Used
 Following are the software’s used to develop this project - 
   - JAVA 1.8
